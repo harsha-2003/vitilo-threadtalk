@@ -23,9 +23,9 @@ Overall, Vitilo ThreadTalk aims to enhance collaborative learning by transformin
 
 ## Tech Stack
 - Frontend:
-  Sri Sravya Valluri
-  Vatsalya Nallagangula
+  -Sri Sravya Valluri
+  -Vatsalya Nallagangula
 - Backend:
-  Tanuja Naga Sai Palapati
-  Harshavardhan Reddy Jonnala
+  -Tanuja Naga Sai Palapati
+  -Harshavardhan Reddy Jonnala
   
