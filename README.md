@@ -28,4 +28,10 @@ Overall, Vitilo ThreadTalk aims to enhance collaborative learning by transformin
 - Backend:
   - Tanuja Naga Sai Palapati
   - Harshavardhan Reddy Jonnala
+
+## Git Workflow
+- main        → stable, working code
+- dev         → integration branch
+- frontend/*  → UI work
+- backend/*   → API & DB work
   
