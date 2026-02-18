@@ -1,59 +1,31 @@
-# Frontend
+# Vitilo ThreadTalk:Academic Discussion & Knowledge Exchange Platform
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.1.4.
+## Team Members
+- Tanuja Naga Sai Palapati
+- Harshavardhan Reddy Jonnala
+- Sri Sravya Valluri
+- Vatsalya Nallagangula
 
-## Development server
 
-To start a local development server, run:
+## Project Description
+Vitilo ThreadTalk is a web-based academic discussion and knowledge exchange platform designed to support structured and meaningful interaction within university courses. The platform provides a dedicated digital space where students can post course-related questions, participate in organized discussions, and collaboratively build understanding through peer and instructor engagement.
 
-```bash
-ng serve
-```
+The system supports threaded and nested conversations, allowing discussions to evolve naturally while maintaining clarity and context. Each discussion thread is associated with a specific course, ensuring that content remains focused, relevant, and easy to navigate. Students can respond to questions, engage in follow-up discussions, and explore multiple viewpoints within a single structured thread.
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+A key feature of Vitilo ThreadTalk is the instructor endorsement mechanism, which allows instructors or teaching assistants to formally highlight accurate, high-quality, or authoritative responses. This feature helps students quickly identify trusted answers, reduces confusion caused by conflicting explanations, and improves overall learning efficiency. Endorsed responses also encourage quality participation and knowledge sharing within the academic community.
 
-## Code scaffolding
+The platform incorporates role-based access control, distinguishing between students, instructors, and administrators. While students can create and participate in discussions, instructors are empowered with moderation and endorsement capabilities, and administrators manage system configuration, user access, and course-level organization. This structured role model ensures academic integrity, accountability, and smooth platform operation.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+Vitilo ThreadTalk is designed with scalability, usability, and maintainability as core software engineering principles. The architecture supports multiple concurrent courses and users, making it suitable for institution-wide deployment. A clean and intuitive user interface minimizes learning overhead, while a modular backend design enables future enhancements such as analytics, search optimization, and integration with existing learning management systems.
 
-```bash
-ng generate component component-name
-```
+Overall, Vitilo ThreadTalk aims to enhance collaborative learning by transforming course discussions into a structured, reliable, and instructor-guided knowledge exchange environment tailored specifically for higher education.
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
 
-```bash
-ng generate --help
-```
-
-## Building
-
-To build the project run:
-
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+## Tech Stack
+- Frontend:
+  - Sri Sravya Valluri
+  - Vatsalya Nallagangula
+- Backend:
+  - Tanuja Naga Sai Palapati
+  - Harshavardhan Reddy Jonnala
+  
