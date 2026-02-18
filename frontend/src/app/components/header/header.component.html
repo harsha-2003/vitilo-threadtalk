@@ -1,0 +1,94 @@
+<header class="header">
+  <div class="header-left">
+    <div class="logo" routerLink="/feed">
+      <div class="logo-icon">V</div>
+      <span>Vitilo</span>
+    </div>
+    
+    <form class="search-container" (submit)="onSearchSubmit($event)">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          placeholder="Search Vitilo"
+          [(ngModel)]="searchQuery"
+          name="search"
+          (input)="onSearchInput($event)"
+          (focus)="showSearchResults = searchQuery.length > 0"
+          autocomplete="off"
+        >
+        <button 
+          *ngIf="searchQuery" 
+          type="button" 
+          class="clear-search"
+          (click)="closeSearchResults()">
+          ✕
+        </button>
+      </div>
+
+      <!-- Search Results Dropdown -->
+      <div class="search-results" *ngIf="showSearchResults && searchResults.length > 0">
+        <div 
+          class="search-result-item" 
+          *ngFor="let result of searchResults"
+          (click)="selectSearchResult(result)">
+          
+          <div *ngIf="result.type === 'post'" class="result-post">
+            <span class="result-icon">📝</span>
+            <div class="result-content">
+              <div class="result-title">{{ result.title }}</div>
+              <div class="result-meta">in c/{{ result.community }}</div>
+            </div>
+          </div>
+
+          <div *ngIf="result.type === 'community'" class="result-community">
+            <span class="result-icon">🏘️</span>
+            <div class="result-content">
+              <div class="result-title">c/{{ result.name }}</div>
+              <div class="result-meta">{{ result.members }} members</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="search-result-footer" (click)="onSearchSubmit($event)">
+          <span>View all results for "{{ searchQuery }}" →</span>
+        </div>
+      </div>
+
+      <!-- No Results Message -->
+      <div class="search-results" *ngIf="showSearchResults && searchQuery.length > 0 && searchResults.length === 0">
+        <div class="no-results">
+          <span>No results found for "{{ searchQuery }}"</span>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <div class="header-right">
+    <div class="header-icon" (click)="goToNotifications()" title="Notifications">
+      <span>🔔</span>
+    </div>
+    
+    <div class="header-icon" (click)="goToMessages()" title="Messages">
+      <span>💬</span>
+    </div>
+    
+    <div class="header-icon user-menu" (click)="goToProfile()" title="Profile">
+      <span *ngIf="!isLoggedIn">👤</span>
+      <span *ngIf="isLoggedIn" class="user-avatar">
+        {{ currentUser?.anonymous_username?.charAt(0) || '?' }}
+      </span>
+    </div>
+
+    <button class="logout-btn" *ngIf="isLoggedIn" (click)="logout()">
+      Logout
+    </button>
+  </div>
+</header>
+
+<!-- Backdrop to close search results when clicking outside -->
+<div 
+  class="search-backdrop" 
+  *ngIf="showSearchResults" 
+  (click)="closeSearchResults()">
+</div>
