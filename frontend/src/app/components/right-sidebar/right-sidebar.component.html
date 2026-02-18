@@ -1,0 +1,116 @@
+<aside class="right-sidebar">
+  <!-- Trending Communities -->
+  <div class="sidebar-card">
+    <div class="card-header">
+      <h3>Trending Communities</h3>
+    </div>
+
+    <div class="trending-list">
+      <div *ngFor="let community of trendingCommunities; let i = index" class="trending-item">
+        <span class="rank">{{ i + 1 }}</span>
+        <div class="trending-info">
+          <a [routerLink]="['/community', community.id]" class="community-link">
+            c/{{ community.name }}
+          </a>
+          <span class="member-count">{{ community.member_count | number }} members</span>
+        </div>
+        <button 
+          mat-stroked-button 
+          color="primary"
+          (click)="toggleJoin(community)"
+          class="join-btn"
+        >
+          {{ community.is_member ? 'Joined' : 'Join' }}
+        </button>
+      </div>
+    </div>
+
+    <button mat-button color="primary" routerLink="/communities" class="view-all-btn">
+      View All Communities
+    </button>
+  </div>
+
+  <!-- Research & Resources -->
+  <div class="sidebar-card">
+    <div class="card-header">
+      <h3>Research & Resources</h3>
+    </div>
+
+    <div class="resource-list">
+      <a href="https://guides.uflib.ufl.edu/" target="_blank" class="resource-item">
+        <mat-icon>library_books</mat-icon>
+        <div class="resource-info">
+          <span class="resource-title">UF Library Guides</span>
+          <span class="resource-desc">Research guides & databases</span>
+        </div>
+        <mat-icon class="external-icon">open_in_new</mat-icon>
+      </a>
+
+      <a href="https://writing.ufl.edu/" target="_blank" class="resource-item">
+        <mat-icon>edit_note</mat-icon>
+        <div class="resource-info">
+          <span class="resource-title">Writing Studio</span>
+          <span class="resource-desc">Free tutoring services</span>
+        </div>
+        <mat-icon class="external-icon">open_in_new</mat-icon>
+      </a>
+
+      <a href="https://teachingcenter.ufl.edu/" target="_blank" class="resource-item">
+        <mat-icon>school</mat-icon>
+        <div class="resource-info">
+          <span class="resource-title">Teaching Center</span>
+          <span class="resource-desc">Study resources</span>
+        </div>
+        <mat-icon class="external-icon">open_in_new</mat-icon>
+      </a>
+
+      <a href="https://career.ufl.edu/" target="_blank" class="resource-item">
+        <mat-icon>work</mat-icon>
+        <div class="resource-info">
+          <span class="resource-title">Career Connections</span>
+          <span class="resource-desc">Jobs & internships</span>
+        </div>
+        <mat-icon class="external-icon">open_in_new</mat-icon>
+      </a>
+    </div>
+  </div>
+
+  <!-- Campus Quick Links -->
+  <div class="sidebar-card">
+    <div class="card-header">
+      <h3>Quick Links</h3>
+    </div>
+
+    <div class="quick-links">
+      <a href="https://one.uf.edu" target="_blank" class="quick-link">
+        <mat-icon>dashboard</mat-icon>
+        <span>ONE.UF</span>
+      </a>
+
+      <a href="https://elearning.ufl.edu" target="_blank" class="quick-link">
+        <mat-icon>computer</mat-icon>
+        <span>Canvas</span>
+      </a>
+
+      <a href="https://campusmap.ufl.edu" target="_blank" class="quick-link">
+        <mat-icon>map</mat-icon>
+        <span>Campus Map</span>
+      </a>
+
+      <a href="https://calendar.ufl.edu" target="_blank" class="quick-link">
+        <mat-icon>event</mat-icon>
+        <span>Calendar</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Footer Links -->
+  <div class="sidebar-footer">
+    <a routerLink="/about">About</a>
+    <span>•</span>
+    <a routerLink="/rules">Rules</a>
+    <span>•</span>
+    <a routerLink="/privacy">Privacy</a>
+    <p class="copyright">© 2026 Vitilo ThreadTalk</p>
+  </div>
+</aside>
