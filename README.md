@@ -6,6 +6,7 @@
 - Sri Sravya Valluri
 - Vatsalya Nallagangula
 
+
 ## Project Description
 Vitilo ThreadTalk is a web-based academic discussion and knowledge exchange platform designed to support structured and meaningful interaction within university courses. The platform provides a dedicated digital space where students can post course-related questions, participate in organized discussions, and collaboratively build understanding through peer and instructor engagement.
 
