@@ -101,6 +101,29 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Post deleted successfully"})
 }
+func (h *PostHandler) DeletePost(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	postID := c.Param("id")
+
+	var post models.Post
+	if err := h.DB.First(&post, postID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
+	// Check ownership
+	if post.UserID != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You can only delete your own posts"})
+		return
+	}
+
+	if err := h.DB.Delete(&post).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete post"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Post deleted successfully"})
+}
 
 func (h *PostHandler) toPostResponse(post models.Post, currentUserID uint) PostResponse {
 	// Get user vote
