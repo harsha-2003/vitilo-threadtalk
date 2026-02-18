@@ -15,6 +15,41 @@ import (
 type PostHandler struct {
 	DB *gorm.DB
 }
+func (h *PostHandler) UploadImage(c *gin.Context) {
+	file, err := c.FormFile("image")
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "No image provided"})
+		return
+	}
+
+	// Validate file type
+	ext := filepath.Ext(file.Filename)
+	if ext != ".jpg" && ext != ".jpeg" && ext != ".png" && ext != ".gif" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file type. Only jpg, jpeg, png, gif allowed"})
+		return
+	}
+
+	// Validate file size (max 5MB)
+	if file.Size > 5*1024*1024 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "File too large. Max 5MB allowed"})
+		return
+	}
+
+	// Generate unique filename
+	filename := uuid.New().String() + ext
+	savePath := "uploads/" + filename
+
+	// Save file
+	if err := c.SaveUploadedFile(file, savePath); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to save image"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"image_url": "/" + savePath,
+		"message":   "Image uploaded successfully",
+	})
+}
 
 type CreatePostRequest struct {
 	Title       string `json:"title" binding:"required"`
