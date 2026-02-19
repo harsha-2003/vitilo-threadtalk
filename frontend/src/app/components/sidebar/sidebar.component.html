@@ -1,0 +1,81 @@
+<aside class="sidebar">
+  <!-- Main Navigation -->
+  <nav class="sidebar-nav">
+    <a routerLink="/feed" routerLinkActive="active" class="nav-item">
+      <mat-icon>home</mat-icon>
+      <span>Home</span>
+    </a>
+
+    <a routerLink="/popular" routerLinkActive="active" class="nav-item">
+      <mat-icon>trending_up</mat-icon>
+      <span>Popular</span>
+    </a>
+
+    <a routerLink="/communities" routerLinkActive="active" class="nav-item">
+      <mat-icon>groups</mat-icon>
+      <span>Communities</span>
+    </a>
+  </nav>
+
+  <mat-divider></mat-divider>
+
+  <!-- My Communities -->
+  <div class="sidebar-section">
+    <div class="section-header">
+      <span class="section-title">MY COMMUNITIES</span>
+      <button mat-icon-button (click)="createCommunity()" matTooltip="Create Community">
+        <mat-icon>add</mat-icon>
+      </button>
+    </div>
+
+    <div class="communities-list" *ngIf="userCommunities.length > 0">
+      <a 
+        *ngFor="let community of userCommunities" 
+        [routerLink]="['/community', community.id]"
+        routerLinkActive="active"
+        class="community-item"
+      >
+        <div class="community-icon">
+          <img *ngIf="community.icon_url" [src]="community.icon_url" [alt]="community.name" />
+          <mat-icon *ngIf="!community.icon_url">forum</mat-icon>
+        </div>
+        <span class="community-name">c/{{ community.name }}</span>
+      </a>
+    </div>
+
+    <div class="empty-state" *ngIf="userCommunities.length === 0">
+      <p>Join communities to see them here</p>
+    </div>
+  </div>
+
+  <mat-divider></mat-divider>
+
+  <!-- Resources -->
+  <div class="sidebar-section">
+    <div class="section-header">
+      <span class="section-title">RESOURCES</span>
+    </div>
+
+    <a href="https://www.ufl.edu" target="_blank" class="nav-item">
+      <mat-icon>school</mat-icon>
+      <span>UF Portal</span>
+      <mat-icon class="external-icon">open_in_new</mat-icon>
+    </a>
+
+    <a href="https://catalog.ufl.edu" target="_blank" class="nav-item">
+      <mat-icon>menu_book</mat-icon>
+      <span>Course Catalog</span>
+      <mat-icon class="external-icon">open_in_new</mat-icon>
+    </a>
+
+    <a routerLink="/about" class="nav-item">
+      <mat-icon>info</mat-icon>
+      <span>About</span>
+    </a>
+
+    <a routerLink="/rules" class="nav-item">
+      <mat-icon>gavel</mat-icon>
+      <span>Rules</span>
+    </a>
+  </div>
+</aside>
