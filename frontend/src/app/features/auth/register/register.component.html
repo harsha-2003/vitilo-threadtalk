@@ -1,0 +1,151 @@
+<div class="register-page">
+  <div class="register-container">
+    <mat-card class="register-card">
+      <!-- Logo -->
+      <div class="logo-section">
+        <svg width="64" height="64" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="16" cy="16" r="16" fill="#FF4500"/>
+          <path d="M16 8C11.6 8 8 11.6 8 16C8 20.4 11.6 24 16 24C20.4 24 24 20.4 24 16C24 11.6 20.4 8 16 8ZM13 18C12.4 18 12 17.6 12 17C12 16.4 12.4 16 13 16C13.6 16 14 16.4 14 17C14 17.6 13.6 18 13 18ZM19 18C18.4 18 18 17.6 18 17C18 16.4 18.4 16 19 16C19.6 16 20 16.4 20 17C20 17.6 19.6 18 19 18ZM19.5 19.5C18.5 20.5 17.3 21 16 21C14.7 21 13.5 20.5 12.5 19.5" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <mat-card-header>
+        <mat-card-title>Join Vitilo ThreadTalk</mat-card-title>
+        <mat-card-subtitle>Create your anonymous account</mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content>
+        <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+          <!-- Email Field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>UF Email</mat-label>
+            <input 
+              matInput 
+              type="email" 
+              formControlName="email"
+              placeholder="your.name@ufl.edu"
+              autocomplete="email"
+            />
+            <mat-icon matPrefix>email</mat-icon>
+            <mat-hint>Use your @ufl.edu email</mat-hint>
+            <mat-error *ngIf="registerForm.get('email')?.hasError('required')">
+              Email is required
+            </mat-error>
+            <mat-error *ngIf="registerForm.get('email')?.hasError('email')">
+              Please enter a valid email
+            </mat-error>
+            <mat-error *ngIf="registerForm.get('email')?.hasError('ufEmail')">
+              Must be a UF email (@ufl.edu)
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Password Field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <input 
+              matInput 
+              [type]="hidePassword ? 'password' : 'text'"
+              formControlName="password"
+              placeholder="Create a strong password"
+              autocomplete="new-password"
+            />
+            <mat-icon matPrefix>lock</mat-icon>
+            <button 
+              mat-icon-button 
+              matSuffix 
+              type="button"
+              (click)="togglePasswordVisibility('password')"
+            >
+              <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-hint>At least 8 characters</mat-hint>
+            <mat-error *ngIf="registerForm.get('password')?.hasError('required')">
+              Password is required
+            </mat-error>
+            <mat-error *ngIf="registerForm.get('password')?.hasError('minlength')">
+              Password must be at least 8 characters
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Password Strength Indicator -->
+          <div class="password-strength" *ngIf="registerForm.get('password')?.value">
+            <mat-progress-bar 
+              mode="determinate" 
+              [value]="getPasswordStrength()"
+              [color]="getPasswordStrengthColor()"
+            ></mat-progress-bar>
+            <span class="strength-text" [class]="getPasswordStrengthColor()">
+              {{ getPasswordStrengthText() }}
+            </span>
+          </div>
+
+          <!-- Confirm Password Field -->
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Confirm Password</mat-label>
+            <input 
+              matInput 
+              [type]="hideConfirmPassword ? 'password' : 'text'"
+              formControlName="confirmPassword"
+              placeholder="Re-enter your password"
+              autocomplete="new-password"
+            />
+            <mat-icon matPrefix>lock_outline</mat-icon>
+            <button 
+              mat-icon-button 
+              matSuffix 
+              type="button"
+              (click)="togglePasswordVisibility('confirmPassword')"
+            >
+              <mat-icon>{{ hideConfirmPassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+            <mat-error *ngIf="registerForm.get('confirmPassword')?.hasError('required')">
+              Please confirm your password
+            </mat-error>
+            <mat-error *ngIf="registerForm.hasError('passwordMismatch') && registerForm.get('confirmPassword')?.touched">
+              Passwords do not match
+            </mat-error>
+          </mat-form-field>
+
+          <!-- Info Box -->
+          <div class="info-box">
+            <mat-icon>info</mat-icon>
+            <p>You'll be assigned a random anonymous username to protect your identity.</p>
+          </div>
+
+          <!-- Submit Button -->
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            class="submit-btn full-width"
+            [disabled]="registerForm.invalid || isLoading"
+          >
+            <mat-spinner diameter="20" *ngIf="isLoading"></mat-spinner>
+            <span *ngIf="!isLoading">Create Account</span>
+          </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="divider">
+          <span>or</span>
+        </div>
+
+        <!-- Login Link -->
+        <div class="login-section">
+          <p>Already have an account?</p>
+          <button mat-stroked-button routerLink="/login" class="full-width">
+            Log In
+          </button>
+        </div>
+
+        <!-- Back to Home -->
+        <div class="back-link">
+          <a routerLink="/">
+            <mat-icon>arrow_back</mat-icon>
+            Back to Home
+          </a>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>
