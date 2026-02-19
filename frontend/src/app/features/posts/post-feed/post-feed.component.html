@@ -1,0 +1,187 @@
+<!-- HEADER -->
+<header class="header">
+  <div class="header-left">
+    <div class="logo" routerLink="/">
+      <div class="logo-icon">V</div>
+      <span>Vitilo</span>
+    </div>
+    <div class="search-box">
+      <span style="color: #818384; font-size: 16px;">🔍</span>
+      <input type="text" placeholder="Search Vitilo">
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="header-icon">🔔</div>
+    <div class="header-icon">💬</div>
+    <div class="header-icon" routerLink="/profile">👤</div>
+  </div>
+</header>
+
+<!-- MAIN CONTAINER -->
+<div class="container">
+  <!-- LEFT SIDEBAR -->
+  <aside class="sidebar-left">
+    <button class="create-btn" (click)="openCreateModal()">+ Create Post</button>
+    
+    <div class="nav-item active">
+      <div class="nav-item-icon">🏠</div>
+      <span>Home</span>
+    </div>
+    
+    <div class="nav-item" routerLink="/communities">
+      <div class="nav-item-icon">🏘️</div>
+      <span>Communities</span>
+    </div>
+    
+    <div class="nav-item">
+      <div class="nav-item-icon">🔥</div>
+      <span>Popular</span>
+    </div>
+
+    <div class="nav-divider"></div>
+    
+    <div class="nav-section-title">Your Communities</div>
+    
+    <div class="nav-item" *ngFor="let community of communities.slice(0, 5)" 
+         [routerLink]="['/communities', community.id]">
+      <div class="nav-item-icon">c/</div>
+      <span>c/{{ community.name }}</span>
+    </div>
+    
+    <div class="nav-item" routerLink="/communities">
+      <div class="nav-item-icon">➕</div>
+      <span>View All</span>
+    </div>
+  </aside>
+
+  <!-- FEED -->
+  <main class="feed">
+    <div *ngIf="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading posts...</p>
+    </div>
+
+    <div *ngIf="!loading && posts.length === 0" class="empty-state">
+      <h3>No posts yet</h3>
+      <p>Be the first to create a post!</p>
+      <button class="btn-primary" (click)="openCreateModal()">Create Post</button>
+    </div>
+
+    <div class="post" *ngFor="let post of posts" (click)="goToPost(post.id)">
+      <div class="post-upvote">
+        <button class="vote-btn" 
+                [class.liked]="post.user_vote === 1"
+                (click)="votePost(post.id, post.user_vote === 1 ? 0 : 1); $event.stopPropagation()">
+          ⬆️
+        </button>
+        <span class="vote-count">{{ formatVotes(post.vote_count) }}</span>
+        <button class="vote-btn" 
+                [class.disliked]="post.user_vote === -1"
+                (click)="votePost(post.id, post.user_vote === -1 ? 0 : -1); $event.stopPropagation()">
+          ⬇️
+        </button>
+      </div>
+      <div class="post-content">
+        <div class="post-header">
+          <span class="post-subreddit">c/{{ post.community_name }}</span>
+          <span>• Posted by u/{{ post.anonymous_username }} {{ getTimeAgo(post.created_at) }}</span>
+        </div>
+        <div class="post-title">{{ post.title }}</div>
+        <div class="post-body">{{ post.content }}</div>
+        <div class="post-footer">
+          <div class="post-action">
+            <span class="post-action-icon">💬</span>
+            <span>{{ post.comment_count }} Comments</span>
+          </div>
+          <div class="post-action">
+            <span class="post-action-icon">↗️</span>
+            <span>Share</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- RIGHT SIDEBAR -->
+  <aside class="sidebar-right">
+    <!-- ABOUT SECTION -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-header">About Vitilo</div>
+      <div class="sidebar-card-content">
+        <div style="font-size: 12px; line-height: 1.6; color: #a6a7a8;">
+          Vitilo is a community-driven platform for UF students to discuss, learn, and connect. Share your thoughts, ask questions, and explore diverse topics.
+        </div>
+      </div>
+    </div>
+
+    <!-- POPULAR COMMUNITIES -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-header">📍 Popular Communities</div>
+      <div class="sidebar-card-content">
+        <div class="sidebar-item" *ngFor="let community of communities.slice(0, 5)"
+             [routerLink]="['/communities', community.id]">
+          c/{{ community.name }} • {{ community.member_count }} members
+        </div>
+      </div>
+    </div>
+
+    <!-- HELP SECTION -->
+    <div class="sidebar-card">
+      <div class="sidebar-card-header">❓ Help & Support</div>
+      <div class="sidebar-card-content">
+        <div class="sidebar-item">Community Guidelines</div>
+        <div class="sidebar-item">Report an Issue</div>
+        <div class="sidebar-item">Contact Support</div>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<!-- CREATE POST MODAL -->
+<div class="modal" [class.show]="showCreateModal" (click)="closeCreateModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Create a New Post</h2>
+      <button class="close-btn" (click)="closeCreateModal()">&times;</button>
+    </div>
+
+    <form (ngSubmit)="createPost()">
+      <div class="form-group">
+        <label for="postTitle">Post Title</label>
+        <input type="text" 
+               id="postTitle" 
+               [(ngModel)]="newPost.title"
+               name="title"
+               placeholder="Enter an engaging title for your post..." 
+               required>
+      </div>
+
+      <div class="form-group">
+        <label for="postCommunity">Community</label>
+        <select id="postCommunity" 
+                [(ngModel)]="newPost.community_id"
+                name="community"
+                required>
+          <option [value]="0">Select a community...</option>
+          <option *ngFor="let community of communities" [value]="community.id">
+            c/{{ community.name }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="postContent">Content</label>
+        <textarea id="postContent" 
+                  [(ngModel)]="newPost.content"
+                  name="content"
+                  placeholder="Write your post content here..." 
+                  required></textarea>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Post</button>
+      </div>
+    </form>
+  </div>
+</div>
