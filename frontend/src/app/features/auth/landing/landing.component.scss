@@ -1,0 +1,243 @@
+.landing-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0079d3 0%, #ff4500 100%);
+  overflow-x: hidden;
+}
+
+.landing-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.hero-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 60px;
+  align-items: center;
+  min-height: 100vh;
+  padding: 40px 0;
+
+  @media (max-width: 968px) {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    text-align: center;
+  }
+}
+
+.hero-content {
+  color: white;
+
+  .logo-large {
+    margin-bottom: 24px;
+
+    svg {
+      filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+    }
+  }
+
+  h1 {
+    font-size: 56px;
+    font-weight: 700;
+    margin: 0 0 16px;
+    line-height: 1.2;
+
+    @media (max-width: 768px) {
+      font-size: 40px;
+    }
+  }
+
+  .tagline {
+    font-size: 24px;
+    margin-bottom: 40px;
+    opacity: 0.95;
+
+    @media (max-width: 768px) {
+      font-size: 18px;
+    }
+  }
+
+  .cta-buttons {
+    display: flex;
+    gap: 16px;
+
+    @media (max-width: 968px) {
+      justify-content: center;
+    }
+
+    @media (max-width: 480px) {
+      flex-direction: column;
+    }
+
+    button {
+      height: 48px;
+      padding: 0 32px;
+      font-size: 16px;
+      font-weight: 600;
+
+      @media (max-width: 480px) {
+        width: 100%;
+      }
+    }
+
+    .primary-cta {
+      background: white !important;
+      color: #0079d3 !important;
+    }
+
+    .secondary-cta {
+      border-color: white;
+      color: white;
+    }
+  }
+}
+
+.hero-image {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .feature-preview {
+    width: 400px;
+    height: 400px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+
+    @media (max-width: 768px) {
+      width: 300px;
+      height: 300px;
+    }
+
+    .feature-icon {
+      font-size: 200px;
+      width: 200px;
+      height: 200px;
+      color: white;
+
+      @media (max-width: 768px) {
+        font-size: 150px;
+        width: 150px;
+        height: 150px;
+      }
+    }
+  }
+}
+
+.features-section {
+  padding: 80px 0;
+  background: white;
+  margin: 0 -20px;
+
+  h2 {
+    text-align: center;
+    font-size: 40px;
+    margin-bottom: 60px;
+    color: #1c1c1c;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+
+    @media (max-width: 968px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .feature-card {
+    padding: 32px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+
+    &:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-icon {
+      font-size: 48px;
+      width: 48px;
+      height: 48px;
+      color: #0079d3;
+      margin-bottom: 16px;
+    }
+
+    h3 {
+      font-size: 20px;
+      margin: 0 0 12px;
+      color: #1c1c1c;
+    }
+
+    p {
+      margin: 0;
+      color: #7c7c7c;
+      line-height: 1.6;
+    }
+  }
+}
+
+.bottom-cta {
+  text-align: center;
+  padding: 100px 0;
+  color: white;
+
+  h2 {
+    font-size: 40px;
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 20px;
+    margin-bottom: 32px;
+    opacity: 0.9;
+  }
+
+  .large-cta {
+    height: 56px;
+    padding: 0 48px;
+    font-size: 18px;
+    font-weight: 600;
+    background: white !important;
+    color: #0079d3 !important;
+  }
+}
+
+.landing-footer {
+  text-align: center;
+  padding: 40px 0;
+  color: white;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+
+  p {
+    margin: 0 0 16px;
+  }
+
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+
+    a {
+      color: white;
+      text-decoration: none;
+      transition: opacity 0.2s;
+
+      &:hover {
+        opacity: 0.7;
+      }
+    }
+  }
+}
