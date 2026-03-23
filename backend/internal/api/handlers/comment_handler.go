@@ -38,6 +38,26 @@ func NewCommentHandler(db *gorm.DB) *CommentHandler {
 	return &CommentHandler{DB: db}
 }
 
+func (h *CommentHandler) loadReplies(commentID uint) ([]models.Comment, error) {
+	var replies []models.Comment
+	if err := h.DB.Where("parent_id = ?", commentID).
+		Preload("User").
+		Order("created_at ASC").
+		Find(&replies).Error; err != nil {
+		return nil, err
+	}
+
+	for i := range replies {
+		children, err := h.loadReplies(replies[i].ID)
+		if err != nil {
+			return nil, err
+		}
+		replies[i].Replies = children
+	}
+
+	return replies, nil
+}
+
 func (h *CommentHandler) GetComments(c *gin.Context) {
 	postID := c.Param("id") // Changed from "post_id" to "id"
 
