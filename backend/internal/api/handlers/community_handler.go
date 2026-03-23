@@ -53,6 +53,7 @@ func (h *CommunityHandler) CreateCommunity(c *gin.Context) {
 		Name:        req.Name,
 		Description: req.Description,
 		IconURL:     req.IconURL,
+		CreatedBy:   userID.(uint),
 	}
 
 	if err := h.DB.Create(&community).Error; err != nil {
@@ -65,6 +66,7 @@ func (h *CommunityHandler) CreateCommunity(c *gin.Context) {
 		UserID:      userID.(uint),
 		CommunityID: community.ID,
 		JoinedAt:    time.Now(),
+		Role:        "owner",
 	}
 	h.DB.Create(&member)
 
