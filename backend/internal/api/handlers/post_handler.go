@@ -267,7 +267,58 @@ func (h *PostHandler) DeletePost(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"message": "Post deleted successfully"})
 }
+func (h *PostHandler) GetCommunityPosts(c *gin.Context) {
+	userID, _ := getUserID(c)
+	communityID := c.Param("id")
 
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+	sortBy := c.DefaultQuery("sort", "new")
+
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = 20
+	}
+	offset := (page - 1) * limit
+
+	query := h.DB.Model(&models.Post{}).
+		Where("community_id = ?", communityID).
+		Preload("User").
+		Preload("Community")
+
+	switch sortBy {
+	case "hot":
+		query = query.Order("(vote_count * 1.0 / (julianday('now') - julianday(created_at) + 2)) DESC")
+	case "top":
+		query = query.Order("vote_count DESC")
+	default:
+		query = query.Order("created_at DESC")
+	}
+
+	var posts []models.Post
+	if err := query.Limit(limit).Offset(offset).Find(&posts).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch community posts"})
+		return
+	}
+
+	var total int64
+	h.DB.Model(&models.Post{}).Where("community_id = ?", communityID).Count(&total)
+
+	resp := make([]PostResponse, 0, len(posts))
+	for _, p := range posts {
+		resp = append(resp, h.toPostResponse(p, userID))
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"posts":       resp,
+		"total":       total,
+		"page":        page,
+		"limit":       limit,
+		"total_pages": (total + int64(limit) - 1) / int64(limit),
+	})
+}
 func (h *PostHandler) toPostResponse(post models.Post, currentUserID uint) PostResponse {
 	// Get user vote
 	var vote models.Vote
