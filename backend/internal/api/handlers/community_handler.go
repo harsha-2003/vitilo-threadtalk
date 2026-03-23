@@ -29,6 +29,12 @@ type CommunityResponse struct {
 	CreatedAt   time.Time `json:"created_at"`
 }
 
+type UpdateCommunityRequest struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	IconURL     string `json:"icon_url"`
+}
+
 func NewCommunityHandler(db *gorm.DB) *CommunityHandler {
 	return &CommunityHandler{DB: db}
 }
@@ -154,6 +160,41 @@ func (h *CommunityHandler) LeaveCommunity(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully left community"})
+}
+
+func (h *CommunityHandler) UpdateCommunity(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	communityID := c.Param("id")
+
+	var community models.Community
+	if err := h.DB.First(&community, communityID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Community not found"})
+		return
+	}
+
+	if community.CreatedBy != userID.(uint) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Only the community owner can update it"})
+		return
+	}
+
+	var req UpdateCommunityRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if req.Name != "" {
+		community.Name = req.Name
+	}
+	community.Description = req.Description
+	community.IconURL = req.IconURL
+
+	if err := h.DB.Save(&community).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update community"})
+		return
+	}
+
+	c.JSON(http.StatusOK, h.toCommunityResponse(community, userID.(uint)))
 }
 
 func (h *CommunityHandler) GetUserCommunities(c *gin.Context) {
