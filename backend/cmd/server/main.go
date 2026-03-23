@@ -28,6 +28,7 @@ func main() {
 		&models.Comment{},
 		&models.Vote{},
 		&models.CommunityMember{},
+		&models.SavedPost{},
 	); err != nil {
 		log.Fatal("Failed to migrate database:", err)
 	}
