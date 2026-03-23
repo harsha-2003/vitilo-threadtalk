@@ -42,6 +42,17 @@ type UserResponse struct {
 	AvatarHash        string `json:"avatar_hash"`
 }
 
+type ProfileSummaryResponse struct {
+	ID                uint   `json:"id"`
+	Email             string `json:"email"`
+	AnonymousUsername string `json:"anonymous_username"`
+	AvatarHash        string `json:"avatar_hash"`
+	PostCount         int64  `json:"post_count"`
+	CommentCount      int64  `json:"comment_count"`
+	CommunityCount    int64  `json:"community_count"`
+	Karma             int64  `json:"karma"`
+}
+
 func NewAuthHandler(db *gorm.DB) *AuthHandler {
 	return &AuthHandler{DB: db}
 }
@@ -147,7 +158,39 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		},
 	})
 }
+func (h *AuthHandler) GetMyProfile(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 
+	var user models.User
+	if err := h.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	var postCount, commentCount, communityCount int64
+	var postVoteSum, commentVoteSum int64
+
+	h.DB.Model(&models.Post{}).Where("user_id = ?", userID).Count(&postCount)
+	h.DB.Model(&models.Comment{}).Where("user_id = ?", userID).Count(&commentCount)
+	h.DB.Model(&models.CommunityMember{}).Where("user_id = ?", userID).Count(&communityCount)
+	h.DB.Model(&models.Post{}).Where("user_id = ?", userID).Select("COALESCE(SUM(vote_count), 0)").Scan(&postVoteSum)
+	h.DB.Model(&models.Comment{}).Where("user_id = ?", userID).Select("COALESCE(SUM(vote_count), 0)").Scan(&commentVoteSum)
+
+	c.JSON(http.StatusOK, ProfileSummaryResponse{
+		ID:                user.ID,
+		Email:             user.Email,
+		AnonymousUsername: user.AnonymousUsername,
+		AvatarHash:        user.AvatarHash,
+		PostCount:         postCount,
+		CommentCount:      commentCount,
+		CommunityCount:    communityCount,
+		Karma:             postVoteSum + commentVoteSum,
+	})
+}
 func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
