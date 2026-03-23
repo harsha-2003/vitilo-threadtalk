@@ -3,7 +3,7 @@ package handlers
 import (
 	"net/http"
 	"time"
-
+    "strconv"
 	"github.com/gin-gonic/gin"
 	"github.com/harsha-2003/vitilo-threadtalk/backend/internal/models"
 	"gorm.io/gorm"
@@ -77,9 +77,44 @@ func (h *CommunityHandler) GetCommunities(c *gin.Context) {
 	userID, _ := c.Get("userID")
 
 	var communities []models.Community
-	if err := h.DB.Find(&communities).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch communities"})
-		return
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+search := c.Query("search")
+sortBy := c.DefaultQuery("sort", "new")
+
+if page < 1 {
+	page = 1
+}
+if limit < 1 || limit > 100 {
+	limit = 20
+}
+offset := (page - 1) * limit
+
+query := h.DB.Model(&models.Community{})
+
+if search != "" {
+	query = query.Where("name LIKE ? OR description LIKE ?", "%"+search+"%", "%"+search+"%")
+}
+
+switch sortBy {
+case "popular":
+	query = query.Order("created_at DESC")
+default:
+	query = query.Order("created_at DESC")
+}
+
+var communities []models.Community
+if err := query.Limit(limit).Offset(offset).Find(&communities).Error; err != nil {
+	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch communities"})
+	return
+}
+
+var total int64
+countQuery := h.DB.Model(&models.Community{})
+if search != "" {
+	countQuery = countQuery.Where("name LIKE ? OR description LIKE ?", "%"+search+"%", "%"+search+"%")
+}
+countQuery.Count(&total)
 	}
 
 	var response []CommunityResponse
