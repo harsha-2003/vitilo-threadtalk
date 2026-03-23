@@ -260,10 +260,27 @@ func (h *PostHandler) DeletePost(c *gin.Context) {
 		return
 	}
 
-	if err := h.DB.Delete(&post).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete post"})
-		return
+	err := h.DB.Transaction(func(tx *gorm.DB) error {
+	if post.ImageURL != "" {
+		imagePath := strings.TrimPrefix(post.ImageURL, "/")
+		_ = os.Remove(imagePath)
 	}
+
+	if err := tx.Where("post_id = ?", post.ID).Delete(&models.Vote{}).Error; err != nil {
+		return err
+	}
+	if err := tx.Where("post_id = ?", post.ID).Delete(&models.Comment{}).Error; err != nil {
+		return err
+	}
+	if err := tx.Delete(&post).Error; err != nil {
+		return err
+	}
+	return nil
+})
+if err != nil {
+	c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete post"})
+	return
+}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Post deleted successfully"})
 }
