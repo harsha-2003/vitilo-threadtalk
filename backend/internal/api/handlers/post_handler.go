@@ -100,7 +100,30 @@ func (h *PostHandler) CreatePost(c *gin.Context) {
 	if req.PostType == "" {
 		req.PostType = "text"
 	}
-
+switch req.PostType {
+case "text":
+	if req.ImageURL != "" || req.LinkURL != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Text posts cannot include image_url or link_url"})
+		return
+	}
+case "image":
+	if strings.TrimSpace(req.ImageURL) == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Image posts require image_url"})
+		return
+	}
+	req.Content = ""
+	req.LinkURL = ""
+case "link":
+	if strings.TrimSpace(req.LinkURL) == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Link posts require link_url"})
+		return
+	}
+	req.Content = ""
+	req.ImageURL = ""
+default:
+	c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post_type. Allowed values: text, image, link"})
+	return
+}
 	post := models.Post{
 		Title:       req.Title,
 		Content:     req.Content,
