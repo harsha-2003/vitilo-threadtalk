@@ -132,6 +132,7 @@ default:
 		UserID:      userID.(uint),
 		CommunityID: req.CommunityID,
 		VoteCount:   0,
+		LinkURL: req.LinkURL,
 	}
 
 	if err := h.DB.Create(&post).Error; err != nil {
@@ -210,5 +211,7 @@ func (h *PostHandler) toPostResponse(post models.Post, currentUserID uint) PostR
 		CommunityID:       post.CommunityID,
 		CommunityName:     post.Community.Name,
 		UserVote:          userVote,
+		LinkURL:           post.LinkURL,
+		
 	}
 }
