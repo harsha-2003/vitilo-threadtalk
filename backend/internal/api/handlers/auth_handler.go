@@ -240,7 +240,42 @@ func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 		AvatarHash:        user.AvatarHash,
 	})
 }
+func (h *AuthHandler) GetMyActivity(c *gin.Context) {
+	userID, exists := c.Get("userID")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
 
+	var posts []models.Post
+	var comments []models.Comment
+
+	h.DB.Where("user_id = ?", userID).Order("created_at DESC").Find(&posts)
+	h.DB.Where("user_id = ?", userID).Order("created_at DESC").Find(&comments)
+
+	activity := []gin.H{}
+
+	for _, post := range posts {
+		activity = append(activity, gin.H{
+			"type":       "post",
+			"id":         post.ID,
+			"title":      post.Title,
+			"created_at": post.CreatedAt,
+		})
+	}
+
+	for _, comment := range comments {
+		activity = append(activity, gin.H{
+			"type":       "comment",
+			"id":         comment.ID,
+			"content":    comment.Content,
+			"post_id":    comment.PostID,
+			"created_at": comment.CreatedAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{"activity": activity})
+}
 // Helper functions
 func generateAnonymousUsername() string {
 	adjectives := []string{"Happy", "Silent", "Brave", "Quick", "Gentle", "Proud", "Clever", "Calm"}
