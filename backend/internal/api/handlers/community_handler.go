@@ -296,7 +296,7 @@ func (h *CommunityHandler) GetCommunityMembers(c *gin.Context) {
 		"total_pages":  (total + int64(limit) - 1) / int64(limit),
 	})
 }
-
+// created specifically to user id
 func (h *CommunityHandler) toCommunityResponse(community models.Community, currentUserID uint) CommunityResponse {
 	// Get member count
 	var memberCount int64
