@@ -250,6 +250,52 @@ func (h *CommunityHandler) GetUserCommunities(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+func (h *CommunityHandler) GetCommunityMembers(c *gin.Context) {
+	communityID := c.Param("id")
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	limit, _ := strconv.Atoi(c.DefaultQuery("limit", "20"))
+
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 || limit > 100 {
+		limit = 20
+	}
+	offset := (page - 1) * limit
+
+	var members []models.CommunityMember
+	if err := h.DB.Where("community_id = ?", communityID).
+		Preload("User").
+		Order("joined_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&members).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch members"})
+		return
+	}
+
+	var total int64
+	h.DB.Model(&models.CommunityMember{}).Where("community_id = ?", communityID).Count(&total)
+
+	response := make([]gin.H, 0, len(members))
+	for _, member := range members {
+		response = append(response, gin.H{
+			"user_id":            member.UserID,
+			"anonymous_username": member.User.AnonymousUsername,
+			"avatar_hash":        member.User.AvatarHash,
+			"joined_at":          member.JoinedAt,
+			"role":               member.Role,
+		})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"members":      response,
+		"total":        total,
+		"page":         page,
+		"limit":        limit,
+		"total_pages":  (total + int64(limit) - 1) / int64(limit),
+	})
+}
 
 func (h *CommunityHandler) toCommunityResponse(community models.Community, currentUserID uint) CommunityResponse {
 	// Get member count
