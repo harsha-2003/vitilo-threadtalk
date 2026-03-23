@@ -120,6 +120,35 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		},
 	})
 }
+func (h *AuthHandler) GetUserProfile(c *gin.Context) {
+	userID := c.Param("id")
+
+	var user models.User
+	if err := h.DB.First(&user, userID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
+		return
+	}
+
+	var postCount, commentCount, communityCount int64
+	var postVoteSum, commentVoteSum int64
+
+	h.DB.Model(&models.Post{}).Where("user_id = ?", user.ID).Count(&postCount)
+	h.DB.Model(&models.Comment{}).Where("user_id = ?", user.ID).Count(&commentCount)
+	h.DB.Model(&models.CommunityMember{}).Where("user_id = ?", user.ID).Count(&communityCount)
+	h.DB.Model(&models.Post{}).Where("user_id = ?", user.ID).Select("COALESCE(SUM(vote_count), 0)").Scan(&postVoteSum)
+	h.DB.Model(&models.Comment{}).Where("user_id = ?", user.ID).Select("COALESCE(SUM(vote_count), 0)").Scan(&commentVoteSum)
+
+	c.JSON(http.StatusOK, gin.H{
+		"id":                 user.ID,
+		"anonymous_username": user.AnonymousUsername,
+		"avatar_hash":        user.AvatarHash,
+		"created_at":         user.CreatedAt,
+		"post_count":         postCount,
+		"comment_count":      commentCount,
+		"community_count":    communityCount,
+		"karma":              postVoteSum + commentVoteSum,
+	})
+}
 
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
