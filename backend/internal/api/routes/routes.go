@@ -50,6 +50,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 			protected.GET("/communities/:id", communityHandler.GetCommunity)
 			protected.POST("/communities/:id/join", communityHandler.JoinCommunity)
 			protected.POST("/communities/:id/leave", communityHandler.LeaveCommunity)
+			protected.PUT("/communities/:id", communityHandler.UpdateCommunity)
 
 			// Post routes
 			protected.GET("/posts", postHandler.GetPosts)
