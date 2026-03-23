@@ -73,6 +73,10 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 			protected.GET("/profile/me", authHandler.GetMyProfile)
 			protected.GET("/users/:id/profile", authHandler.GetUserProfile)
 			protected.GET("/profile/me/activity", authHandler.GetMyActivity)
+
+			protected.POST("/posts/:id/save", postHandler.SavePost)
+            protected.DELETE("/posts/:id/save", postHandler.UnsavePost)
+            protected.GET("/profile/me/saved-posts", postHandler.GetSavedPosts)
 		}
 	}
 }
