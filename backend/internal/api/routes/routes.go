@@ -56,6 +56,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 			protected.POST("/posts", postHandler.CreatePost)
 			protected.POST("/posts/upload", postHandler.UploadImage) // BEFORE :id route
 			protected.GET("/posts/:id", postHandler.GetPost)
+			protected.PUT("/posts/:id", postHandler.UpdatePost)
 			protected.DELETE("/posts/:id", postHandler.DeletePost)
 			protected.GET("/posts/:id/comments", commentHandler.GetComments) // Changed from :post_id to :id
 
