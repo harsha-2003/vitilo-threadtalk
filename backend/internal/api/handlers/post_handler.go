@@ -58,6 +58,13 @@ type CreatePostRequest struct {
 	PostType    string `json:"post_type"`
 	ImageURL    string `json:"image_url"`
 }
+type UpdatePostRequest struct {
+	Title    string `json:"title"`
+	Content  string `json:"content"`
+	ImageURL string `json:"image_url"`
+	LinkURL  string `json:"link_url"`
+	PostType string `json:"post_type"`
+}
 
 type PostResponse struct {
 	ID                uint      `json:"id"`
@@ -159,6 +166,83 @@ default:
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Post deleted successfully"})
+}
+
+func (h *PostHandler) UpdatePost(c *gin.Context) {
+	userID, ok := getUserID(c)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+		return
+	}
+
+	postID := c.Param("id")
+
+	var post models.Post
+	if err := h.DB.First(&post, postID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+		return
+	}
+
+	if post.UserID != userID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "You can only update your own posts"})
+		return
+	}
+
+	var req UpdatePostRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	req.Title = strings.TrimSpace(req.Title)
+	req.Content = strings.TrimSpace(req.Content)
+	req.ImageURL = strings.TrimSpace(req.ImageURL)
+	req.LinkURL = strings.TrimSpace(req.LinkURL)
+
+	if req.PostType == "" {
+		req.PostType = post.PostType
+	}
+
+	switch req.PostType {
+	case "text":
+		if req.Title == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Title is required"})
+			return
+		}
+		req.ImageURL = ""
+		req.LinkURL = ""
+	case "image":
+		if req.ImageURL == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Image posts require image_url"})
+			return
+		}
+		req.Content = ""
+		req.LinkURL = ""
+	case "link":
+		if req.LinkURL == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Link posts require link_url"})
+			return
+		}
+		req.Content = ""
+		req.ImageURL = ""
+	default:
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid post_type"})
+		return
+	}
+
+	post.Title = req.Title
+	post.Content = req.Content
+	post.ImageURL = req.ImageURL
+	post.LinkURL = req.LinkURL
+	post.PostType = req.PostType
+
+	if err := h.DB.Save(&post).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update post"})
+		return
+	}
+
+	h.DB.Preload("User").Preload("Community").First(&post, post.ID)
+	c.JSON(http.StatusOK, h.toPostResponse(post, userID))
 }
 func (h *PostHandler) DeletePost(c *gin.Context) {
 	userID, _ := c.Get("userID")
