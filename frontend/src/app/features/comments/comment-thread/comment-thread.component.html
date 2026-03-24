@@ -1,0 +1,132 @@
+<div class="comment-thread">
+  <!-- Loading state -->
+  <div class="comment-thread__loading" *ngIf="isLoading">
+    Loading comments...
+  </div>
+
+  <!-- Empty state -->
+  <div class="comment-thread__empty" *ngIf="!isLoading && (!comments || comments.length === 0)">
+    No comments yet. Be the first to comment.
+  </div>
+
+  <!-- Comments list -->
+  <div class="comment-thread__list" *ngIf="!isLoading && comments && comments.length > 0">
+    <ng-container *ngFor="let comment of comments">
+      <div class="comment" [class.comment--reply]="!!comment.parent_id">
+        <!-- Header -->
+        <div class="comment__header">
+          <div class="comment__avatar" aria-hidden="true">
+            {{ (comment.anonymous_username || '?') | slice:0:1 | uppercase }}
+          </div>
+
+          <div class="comment__meta">
+            <div class="comment__author">
+              {{ comment.anonymous_username || 'Anonymous' }}
+            </div>
+
+            <div class="comment__time" *ngIf="comment.created_at">
+              {{ comment.created_at | date:'medium' }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="comment__body">
+          <p class="comment__content">{{ comment.content }}</p>
+        </div>
+
+        <!-- Actions -->
+        <div class="comment__actions">
+          <!-- Voting (optional) -->
+          <button
+            type="button"
+            class="comment__action-btn"
+            (click)="upvote(comment)"
+            [disabled]="isActionLoading"
+            data-cy="comment-upvote"
+          >
+            Upvote
+          </button>
+
+          <button
+            type="button"
+            class="comment__action-btn"
+            (click)="downvote(comment)"
+            [disabled]="isActionLoading"
+            data-cy="comment-downvote"
+          >
+            Downvote
+          </button>
+
+          <span class="comment__votes" *ngIf="comment.vote_count !== undefined">
+            {{ comment.vote_count }}
+          </span>
+
+          <!-- Reply -->
+          <button
+            type="button"
+            class="comment__action-btn"
+            (click)="toggleReply(comment)"
+            [disabled]="isActionLoading"
+            data-cy="comment-reply"
+          >
+            Reply
+          </button>
+
+          <!-- Delete (only if owner) -->
+          <button
+            *ngIf="canDelete(comment)"
+            type="button"
+            class="comment__action-btn comment__action-btn--danger"
+            (click)="deleteComment(comment)"
+            [disabled]="isActionLoading"
+            data-cy="comment-delete"
+          >
+            Delete
+          </button>
+        </div>
+
+        <!-- Reply form -->
+        <div class="comment__reply-form" *ngIf="isReplyOpen(comment)">
+          <textarea
+            class="comment__reply-input"
+            [(ngModel)]="replyText"
+            rows="3"
+            placeholder="Write a reply..."
+            data-cy="comment-reply-textarea"
+          ></textarea>
+
+          <div class="comment__reply-actions">
+            <button
+              type="button"
+              class="comment__action-btn"
+              (click)="submitReply(comment)"
+              [disabled]="!replyText?.trim() || isActionLoading"
+              data-cy="comment-reply-submit"
+            >
+              Post Reply
+            </button>
+
+            <button
+              type="button"
+              class="comment__action-btn"
+              (click)="toggleReply(comment)"
+              [disabled]="isActionLoading"
+              data-cy="comment-reply-cancel"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+
+        <!-- Replies (recursive rendering if children exist) -->
+        <div class="comment__replies" *ngIf="comment.replies && comment.replies.length > 0">
+          <app-comment-thread
+            [comments]="comment.replies"
+            [isLoading]="false"
+          ></app-comment-thread>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>
