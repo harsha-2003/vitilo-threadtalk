@@ -93,3 +93,33 @@ describe('ThreadTalk - Login Page Smoke Test', () => {
     cy.contains('a', 'Back to Home').click();
     cy.url().should('eq', `${Cypress.config().baseUrl}/`);
   });
+it('"Create Account" button preserves form state when navigating away', () => {
+    cy.visit('/login');
+    
+    // Fill form
+    cy.get('input[formcontrolname="email"]')
+      .type('test@example.com');
+
+    cy.get('input[formcontrolname="password"]')
+      .type('password123');
+
+    // Click Create Account
+    cy.contains('button', 'Create Account').click();
+
+    // Should navigate to register
+    cy.url().should('include', '/register');
+
+    // Go back to login
+    cy.go('back');
+
+    // Verify we're back on login page
+    cy.get('.login-page').should('be.visible');
+  });
+
+  it('submit button displays correct text', () => {
+    cy.visit('/login');
+    
+    cy.contains('button[type="submit"]', 'Log In')
+      .should('be.visible')
+      .should('contain', 'Log In');
+  });
