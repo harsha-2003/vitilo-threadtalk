@@ -348,3 +348,22 @@ it('form fields have outline appearance', () => {
     cy.get('button[mat-icon-button][matSuffix]')
       .should('have.attr', 'type', 'button');
   });
+it('signup section is visible on login page', () => {
+    cy.visit('/login');
+    
+    cy.get('.signup-section').should('be.visible');
+  });
+
+  it('signup section contains "Don\'t have an account?" text', () => {
+    cy.visit('/login');
+    
+    cy.get('.signup-section').contains("Don't have an account?").should('be.visible');
+  });
+
+  // DIVIDER TESTS
+  it('divider with "or" text is visible', () => {
+    cy.visit('/login');
+    
+    cy.get('.divider').should('be.visible');
+    cy.get('.divider').contains('or').should('be.visible');
+  });
