@@ -1,0 +1,53 @@
+<app-header></app-header>
+
+<div class="profile-page">
+  <div class="banner"></div>
+
+  <div class="profile-card" *ngIf="user; else notLoggedIn">
+    <div class="avatar">{{ getInitial() }}</div>
+
+    <div class="info">
+      <div class="title-row">
+        <h2 class="name">{{ user.anonymous_username }}</h2>
+        <button class="edit-btn" mat-stroked-button>Edit profile</button>
+      </div>
+
+      <div class="handle">@{{ user.anonymous_username }}</div>
+      <div class="meta">Joined</div>
+    </div>
+  </div>
+
+  <ng-template #notLoggedIn>
+    <div class="error-card">
+      <h3>Please login to view your profile.</h3>
+      <button mat-raised-button color="primary" routerLink="/login">Go to Login</button>
+    </div>
+  </ng-template>
+
+  <div class="tabs">
+    <button class="tab active">Posts</button>
+  </div>
+  <div class="posts-section">
+  <h3>Posts</h3>
+
+  <div *ngIf="isLoadingPosts" class="loading">
+    Loading your posts...
+  </div>
+
+  <div *ngIf="!isLoadingPosts && posts.length === 0" class="empty">
+    You haven't posted anything yet.
+  </div>
+
+  <div *ngIf="!isLoadingPosts && posts.length > 0" class="post-list">
+    <div class="post-item" *ngFor="let post of posts" [routerLink]="['/post', post.id]">
+      <div class="meta">
+        c/{{ post.community_name }} • {{ post.created_at | date:'medium' }}
+      </div>
+      <div class="title">{{ post.title }}</div>
+      <div class="content">{{ post.content }}</div>
+      <div class="stats">
+        ⬆ {{ post.vote_count }} • 💬 {{ post.comment_count }}
+      </div>
+    </div>
+  </div>
+</div>
