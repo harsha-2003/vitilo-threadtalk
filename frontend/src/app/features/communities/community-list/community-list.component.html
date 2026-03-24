@@ -1,0 +1,252 @@
+<div class="communities-page">
+  <div class="communities-container">
+    <!-- Header -->
+    <div class="page-header">
+      <div class="header-content">
+        <h1>Communities</h1>
+        <p>Discover and join communities at UF</p>
+      </div>
+      <button mat-raised-button color="primary" (click)="openCreateCommunityDialog()">
+        <mat-icon>add</mat-icon>
+        Create Community
+      </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="search-section">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search communities</mat-label>
+        <input 
+          matInput 
+          [(ngModel)]="searchQuery"
+          (keyup)="onSearch()"
+          placeholder="Search by name or description"
+        />
+        <mat-icon matPrefix>search</mat-icon>
+        <button 
+          mat-icon-button 
+          matSuffix 
+          *ngIf="searchQuery"
+          (click)="searchQuery = ''; onSearch()"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </mat-form-field>
+    </div>
+
+    <!-- Tabs -->
+    <mat-tab-group 
+      [(selectedIndex)]="selectedTab"
+      (selectedIndexChange)="onTabChange($event)"
+      class="communities-tabs"
+    >
+      <!-- All Communities Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>public</mat-icon>
+          <span>All Communities</span>
+          <mat-chip class="count-chip">{{ allCommunities.length }}</mat-chip>
+        </ng-template>
+
+        <div class="tab-content">
+          <!-- Loading State -->
+          <div class="loading-state" *ngIf="isLoading">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p>Loading communities...</p>
+          </div>
+
+          <!-- Empty State -->
+          <div class="empty-state" *ngIf="!isLoading && filteredCommunities.length === 0">
+            <mat-icon>search_off</mat-icon>
+            <h3>No communities found</h3>
+            <p *ngIf="searchQuery">Try a different search term</p>
+            <p *ngIf="!searchQuery">Be the first to create a community!</p>
+            <button mat-raised-button color="primary" (click)="openCreateCommunityDialog()">
+              Create Community
+            </button>
+          </div>
+
+          <!-- Communities Grid -->
+          <div class="communities-grid" *ngIf="!isLoading && filteredCommunities.length > 0">
+            <mat-card 
+              *ngFor="let community of filteredCommunities" 
+              class="community-card"
+            >
+              <!-- Community Header -->
+              <div class="card-header">
+                <div class="community-info">
+                  <div class="community-icon">
+                    <img [src]="getCommunityIcon(community)" [alt]="community.name" />
+                  </div>
+                  <div class="community-details">
+                    <h3 [routerLink]="['/community', community.id]">c/{{ community.name }}</h3>
+                    <p class="member-count">
+                      <mat-icon>people</mat-icon>
+                      {{ community.member_count | number }} members
+                    </p>
+                  </div>
+                </div>
+                
+                <button 
+                  mat-stroked-button 
+                  [color]="community.is_member ? 'accent' : 'primary'"
+                  (click)="toggleJoin(community)"
+                  class="join-btn"
+                >
+                  {{ community.is_member ? 'Joined' : 'Join' }}
+                </button>
+              </div>
+
+              <!-- Community Description -->
+              <mat-card-content>
+                <p class="description">
+                  {{ community.description || 'No description available' }}
+                </p>
+              </mat-card-content>
+
+              <!-- Community Actions -->
+              <mat-card-actions>
+                <button 
+                  mat-button 
+                  [routerLink]="['/community', community.id]"
+                  class="view-btn"
+                >
+                  <mat-icon>arrow_forward</mat-icon>
+                  View Community
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+        </div>
+      </mat-tab>
+
+      <!-- My Communities Tab -->
+      <mat-tab>
+        <ng-template mat-tab-label>
+          <mat-icon>group</mat-icon>
+          <span>My Communities</span>
+          <mat-chip class="count-chip">{{ myCommunities.length }}</mat-chip>
+        </ng-template>
+
+        <div class="tab-content">
+          <!-- Empty State -->
+          <div class="empty-state" *ngIf="myCommunities.length === 0">
+            <mat-icon>groups</mat-icon>
+            <h3>No communities yet</h3>
+            <p>Join communities to see them here</p>
+            <button mat-raised-button color="primary" (click)="selectedTab = 0">
+              Browse Communities
+            </button>
+          </div>
+
+          <!-- My Communities Grid -->
+          <div class="communities-grid" *ngIf="myCommunities.length > 0">
+            <mat-card 
+              *ngFor="let community of myCommunities" 
+              class="community-card"
+            >
+              <!-- Community Header -->
+              <div class="card-header">
+                <div class="community-info">
+                  <div class="community-icon">
+                    <img [src]="getCommunityIcon(community)" [alt]="community.name" />
+                  </div>
+                  <div class="community-details">
+                    <h3 [routerLink]="['/community', community.id]">c/{{ community.name }}</h3>
+                    <p class="member-count">
+                      <mat-icon>people</mat-icon>
+                      {{ community.member_count | number }} members
+                    </p>
+                  </div>
+                </div>
+                
+                <button 
+                  mat-stroked-button 
+                  color="accent"
+                  (click)="leaveCommunity(community)"
+                  class="join-btn"
+                >
+                  Joined
+                </button>
+              </div>
+
+              <!-- Community Description -->
+              <mat-card-content>
+                <p class="description">
+                  {{ community.description || 'No description available' }}
+                </p>
+              </mat-card-content>
+
+              <!-- Community Actions -->
+              <mat-card-actions>
+                <button 
+                  mat-button 
+                  [routerLink]="['/community', community.id]"
+                  class="view-btn"
+                >
+                  <mat-icon>arrow_forward</mat-icon>
+                  View Community
+                </button>
+              </mat-card-actions>
+            </mat-card>
+          </div>
+        </div>
+      </mat-tab>
+    </mat-tab-group>
+  </div>
+</div>
+
+<!-- Create Community Dialog (if not using separate component) -->
+<div class="dialog-backdrop" *ngIf="showCreateDialog" (click)="closeCreateDialog()">
+  <mat-card class="create-dialog" (click)="$event.stopPropagation()">
+    <mat-card-header>
+      <mat-card-title>Create a Community</mat-card-title>
+      <button mat-icon-button class="close-btn" (click)="closeCreateDialog()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="createForm" (ngSubmit)="createCommunity()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Community Name</mat-label>
+          <input matInput formControlName="name" placeholder="e.g., Programming, Gaming">
+          <mat-hint>3-50 characters, no spaces</mat-hint>
+          <mat-error *ngIf="createForm.get('name')?.hasError('required')">
+            Name is required
+          </mat-error>
+          <mat-error *ngIf="createForm.get('name')?.hasError('minlength')">
+            Must be at least 3 characters
+          </mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Description</mat-label>
+          <textarea 
+            matInput 
+            formControlName="description" 
+            rows="4"
+            placeholder="Describe what this community is about..."></textarea>
+          <mat-hint>10-500 characters</mat-hint>
+          <mat-error *ngIf="createForm.get('description')?.hasError('required')">
+            Description is required
+          </mat-error>
+          <mat-error *ngIf="createForm.get('description')?.hasError('minlength')">
+            Must be at least 10 characters
+          </mat-error>
+        </mat-form-field>
+
+        <div class="dialog-actions">
+          <button mat-button type="button" (click)="closeCreateDialog()">Cancel</button>
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="createForm.invalid || isSubmitting">
+            {{ isSubmitting ? 'Creating...' : 'Create' }}
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
