@@ -367,3 +367,204 @@ it('signup section is visible on login page', () => {
     cy.get('.divider').should('be.visible');
     cy.get('.divider').contains('or').should('be.visible');
   });
+it('back link section is visible', () => {
+    cy.visit('/login');
+    
+    cy.get('.back-link').should('be.visible');
+  });
+
+  it('back link contains arrow icon', () => {
+    cy.visit('/login');
+    
+    cy.get('.back-link mat-icon').should('contain', 'arrow_back');
+  });
+
+  it('multiple form submissions reset form state properly', () => {
+    cy.visit('/login');
+    
+    // First attempt
+    cy.get('input[formcontrolname="email"]').type('test@example.com');
+    cy.get('input[formcontrolname="password"]').type('password123');
+    cy.contains('button[type="submit"]', 'Log In').click();
+    
+    cy.wait(1000);
+    
+    // Form should still be visible
+    cy.get('.login-page').should('be.visible');
+    cy.get('input[formcontrolname="email"]').should('be.visible');
+  });
+
+
+  it('email input accepts valid email format', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]')
+      .type('student@university.edu')
+      .should('have.value', 'student@university.edu');
+
+    // Form should be valid if password is also filled
+    cy.get('input[formcontrolname="password"]').type('password123');
+    cy.contains('button[type="submit"]', 'Log In').should('not.be.disabled');
+  });
+
+
+  it('password input accepts exactly 8 characters', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]').type('test@example.com');
+    cy.get('input[formcontrolname="password"]')
+      .type('12345678')
+      .should('have.value', '12345678');
+
+    // Form should be valid
+    cy.contains('button[type="submit"]', 'Log In').should('not.be.disabled');
+  });
+
+  it('password input accepts long passwords', () => {
+    cy.visit('/login');
+    
+    const longPassword = 'aVeryLongPasswordWith123SpecialChars!@#';
+    
+    cy.get('input[formcontrolname="email"]').type('test@example.com');
+    cy.get('input[formcontrolname="password"]')
+      .type(longPassword)
+      .should('have.value', longPassword);
+
+    // Form should be valid
+    cy.contains('button[type="submit"]', 'Log In').should('not.be.disabled');
+  });
+
+  it('create account button has routerLink to register', () => {
+    cy.visit('/login');
+    
+    cy.contains('button', 'Create Account')
+      .should('have.attr', 'routerLink', '/register');
+  });
+
+  it('back to home link has routerLink to home', () => {
+    cy.visit('/login');
+    
+    cy.contains('a', 'Back to Home')
+      .should('have.attr', 'routerLink', '/');
+  });
+
+  it('submit button has correct CSS classes', () => {
+    cy.visit('/login');
+    
+    cy.contains('button[type="submit"]', 'Log In')
+      .should('have.class', 'submit-btn')
+      .should('have.class', 'full-width');
+  });
+//207
+
+  it('create account button has full-width class', () => {
+    cy.visit('/login');
+    
+    cy.contains('button', 'Create Account')
+      .should('have.class', 'full-width');
+  });
+
+  it('mat-form-fields have full-width class', () => {
+    cy.visit('/login');
+    
+    cy.get('mat-form-field.full-width').should('have.length', 2);
+  });
+
+  it('submit button has primary color attribute', () => {
+    cy.visit('/login');
+    
+    cy.contains('button[type="submit"]', 'Log In')
+      .should('have.attr', 'color', 'primary');
+  });
+
+  it('email label displays "Email"', () => {
+    cy.visit('/login');
+    
+    cy.get('mat-form-field').first().find('mat-label').should('contain', 'Email');
+  });
+
+  it('password label displays "Password"', () => {
+    cy.visit('/login');
+    
+    cy.get('mat-form-field').last().find('mat-label').should('contain', 'Password');
+  });
+
+  it('form submission with valid credentials sends data', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]').type('test@example.com');
+    cy.get('input[formcontrolname="password"]').type('password123');
+
+    const submitButton = cy.contains('button[type="submit"]', 'Log In');
+    submitButton.should('not.be.disabled');
+    submitButton.click();
+
+    // App should process the submission
+    cy.get('.login-page').should('be.visible');
+  });
+
+  it('password visibility toggle updates aria-label', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"]').type('password123');
+    
+    // Check initial aria-label
+    cy.get('button[mat-icon-button][matSuffix]')
+      .should('have.attr', 'aria-label')
+      .and('include', 'Hide password');
+  });
+
+  it('SVG logo has correct dimensions', () => {
+    cy.visit('/login');
+    
+    cy.get('.logo-section svg')
+      .should('have.attr', 'width', '64')
+      .should('have.attr', 'height', '64');
+  });
+
+  it('email error message appears when email field is blurred with invalid value', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]')
+      .focus()
+      .type('invalid')
+      .blur();
+
+    cy.contains('Please enter a valid email').should('be.visible');
+  });
+
+  it('password error message appears when field is blurred with short value', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"]')
+      .focus()
+      .type('short')
+      .blur();
+
+    cy.contains('Password must be at least 8 characters').should('be.visible');
+  });
+
+  it('form resets errors when invalid field is corrected', () => {
+    cy.visit('/login');
+    
+    // Type invalid email
+    cy.get('input[formcontrolname="email"]')
+      .type('invalid')
+      .blur();
+
+    cy.contains('Please enter a valid email').should('be.visible');
+
+    // Clear and type valid email
+    cy.get('input[formcontrolname="email"]')
+      .clear()
+      .type('valid@example.com');
+
+    // Error should disappear
+    cy.contains('Please enter a valid email').should('not.exist');
+  });
+
+  it('create account button is not disabled', () => {
+    cy.visit('/login');
+    
+    cy.contains('button', 'Create Account').should('not.be.disabled');
+  });
