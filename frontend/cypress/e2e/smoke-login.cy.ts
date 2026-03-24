@@ -161,3 +161,106 @@ it('"Create Account" button preserves form state when navigating away', () => {
     // Should show validation error
     cy.contains('Please enter a valid email').should('be.visible');
   });
+it('password input has correct placeholder text', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"]')
+      .should('have.attr', 'placeholder', 'Enter your password');
+  });
+
+  it('password input has correct autocomplete attribute', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"]')
+      .should('have.attr', 'autocomplete', 'current-password');
+  });
+
+  it('password input type is password initially', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"]')
+      .should('have.attr', 'type', 'password');
+  });
+
+  it('password field can be cleared after typing', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"]')
+      .type('password123')
+      .clear()
+      .should('have.value', '');
+  });
+
+  it('password field shows error when required', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]').type('test@example.com');
+    cy.get('input[formcontrolname="email"]').blur();
+    
+    // Password is required, should show error
+    cy.get('input[formcontrolname="password"]').focus().blur();
+    cy.contains('Password is required').should('be.visible');
+  });
+
+  it('password field shows error when less than 8 characters', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"]').type('pass');
+    cy.get('input[formcontrolname="password"]').blur();
+    
+    // Should show minlength error
+    cy.contains('Password must be at least 8 characters').should('be.visible');
+  });
+
+  // PASSWORD VISIBILITY TOGGLE TESTS
+  it('password visibility toggle button exists', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"]').type('password123');
+    cy.get('button[mat-icon-button][matSuffix]').should('be.visible');
+  });
+
+  it('password visibility icon shows correct state when hidden', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"]').type('password123');
+    
+    // Initially password should be hidden, icon should show visibility_off
+    cy.get('button[mat-icon-button][matSuffix]')
+      .find('mat-icon')
+      .should('contain', 'visibility_off');
+  });
+
+  it('password visibility icon changes when toggled', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"]').type('password123');
+    
+    // Click toggle
+    cy.get('button[mat-icon-button][matSuffix]').click();
+    
+    // Icon should change to visibility
+    cy.get('button[mat-icon-button][matSuffix]')
+      .find('mat-icon')
+      .should('contain', 'visibility');
+  });
+
+  it('toggling password visibility twice returns to original state', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"]').type('password123');
+    
+    const toggle = cy.get('button[mat-icon-button][matSuffix]');
+    
+    // First click
+    toggle.click();
+    cy.get('button[mat-icon-button][matSuffix]')
+      .find('mat-icon')
+      .should('contain', 'visibility');
+    
+    // Second click
+    toggle.click();
+    cy.get('button[mat-icon-button][matSuffix]')
+      .find('mat-icon')
+      .should('contain', 'visibility_off');
+  });
