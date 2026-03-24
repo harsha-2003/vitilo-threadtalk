@@ -291,3 +291,60 @@ it('password input has correct placeholder text', () => {
     
     cy.get('mat-form-field').should('have.length', 2);
   });
+it('form fields have outline appearance', () => {
+    cy.visit('/login');
+    
+    cy.get('mat-form-field[appearance="outline"]').should('have.length', 2);
+  });
+
+  it('login page container has correct class', () => {
+    cy.visit('/login');
+    
+    cy.get('.login-container').should('be.visible');
+  });
+
+  // FORM VALIDATION TESTS
+  it('form is invalid when email is empty', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"]').type('password123');
+    
+    // Form should be invalid, submit button disabled
+    cy.contains('button[type="submit"]', 'Log In').should('be.disabled');
+  });
+
+  it('form is invalid when password is empty', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]').type('test@example.com');
+    
+    // Form should be invalid, submit button disabled
+    cy.contains('button[type="submit"]', 'Log In').should('be.disabled');
+  });
+
+  it('valid form enables submit button', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]').type('test@example.com');
+    cy.get('input[formcontrolname="password"]').type('password123');
+    
+    cy.contains('button[type="submit"]', 'Log In')
+      .should('not.be.disabled');
+  });
+
+  // BUTTON TYPE TESTS
+  it('submit button type is submit', () => {
+    cy.visit('/login');
+    
+    cy.contains('button[type="submit"]', 'Log In')
+      .should('have.attr', 'type', 'submit');
+  });
+
+  it('password toggle button type is button (not submit)', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"]').type('password123');
+    
+    cy.get('button[mat-icon-button][matSuffix]')
+      .should('have.attr', 'type', 'button');
+  });
