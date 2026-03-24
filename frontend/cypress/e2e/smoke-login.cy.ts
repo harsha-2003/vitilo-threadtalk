@@ -43,6 +43,50 @@ describe('ThreadTalk - Login Page Smoke Test', () => {
     cy.contains('button', 'Create Account').click();
     cy.url().should('include', '/register');
   });
+  it('submit button has correct disabled state with invalid email', () => {
+    cy.visit('/login');
+    
+    // Fill with invalid email
+    cy.get('input[formcontrolname="email"]')
+      .type('invalid-email')
+      .should('have.value', 'invalid-email');
+
+    cy.get('input[formcontrolname="password"]')
+      .type('password123')
+      .should('have.value', 'password123');
+
+    // Submit button should remain disabled with invalid email
+    cy.contains('button[type="submit"]', 'Log In').should('be.disabled');
+  });
+
+  it('submit button has correct disabled state with short password', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]')
+      .type('test@example.com')
+      .should('have.value', 'test@example.com');
+
+    // Password less than 8 characters
+    cy.get('input[formcontrolname="password"]')
+      .type('short')
+      .should('have.value', 'short');
+
+    // Submit button should be disabled
+    cy.contains('button[type="submit"]', 'Log In').should('be.disabled');
+  });
+
+  it('"Back to Home" link is clickable and has correct href', () => {
+    cy.visit('/login');
+    
+    const backToHomeLink = cy.contains('a', 'Back to Home');
+    
+    // Link should be visible
+    backToHomeLink.should('be.visible');
+    
+    // Link should have href attribute pointing to home
+    backToHomeLink.should('have.attr', 'routerLink', '/');
+  });
+
 
   it('navigates back to home using "Back to Home" link', () => {
     cy.visit('/login');
