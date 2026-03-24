@@ -288,4 +288,176 @@ In your presentation, demonstrate:
 - Community search & filters  
 - Transactional voting improvements  
 - Better error handling standardization  
-- More test coverage  
+- More test coverage
+
+
+# Sprint 2 – Vitilo ThreadTalk Frontend
+
+## Overview
+Vitilo ThreadTalk is a Reddit-style discussion platform built for the Software Engineering project. The **frontend for Sprint 2** was implemented using **Angular (Standalone Components)** with **Angular Material** styling. This sprint focused on delivering the core user-facing UI flows and integrating them with backend APIs, along with adding both **unit tests (Angular/Jasmine/Karma)** and a **Cypress E2E test suite** for the Login page.
+
+---
+
+## Frontend Technology Stack
+- **Language:** TypeScript  
+- **Framework:** Angular (Standalone Components)  
+- **Styling/UI:** SCSS + Angular Material  
+- **Routing:** Angular Router  
+- **Auth Storage:** LocalStorage (JWT token + user object)  
+- **Testing (Unit):** Jasmine + Karma (via Angular CLI)  
+- **Testing (E2E):** Cypress  
+
+---
+
+## Frontend Work Completed in Sprint 2
+
+### Authentication UI (Login/Register)
+- Built/validated Login page UI using Angular Reactive Forms  
+- Email and password validation:
+  - Email required + email format validation
+  - Password required + minlength validation (8 characters)
+- Loading state and disabled submit behavior based on form validity  
+- Password visibility toggle (hide/show password)
+- Navigation links:
+  - “Create Account” → `/register`
+  - “Back to Home” → `/`
+
+### Header & Navigation
+- Profile navigation support from header (profile icon/button routes to Profile page)
+- Fixed compilation issues caused by duplicate method definitions in header (`goToProfile`) by ensuring a single function implementation
+
+### Profile Page
+- Profile page UI created/updated to display:
+  - User information (anonymous username, avatar initial/hash)
+  - User’s posts section with loading + empty state
+- Integrated profile posts API using a user-id route pattern:
+  - `GET /api/users/:id/posts`
+- Updated PostService to fetch posts for a specific user based on logged-in user id
+
+### General Integration / Build Fixes
+- Resolved Angular build errors due to:
+  - TemplateUrl missing files (NG2008)
+  - Routes syntax issues (TS1005)
+  - Template variable mismatches (`isLoading` vs `isLoadingPosts`)
+- Standardized component state variables and ensured template bindings match component properties
+
+---
+
+# Frontend E2E Test Documentation (Cypress)
+
+## Base URL
+http://localhost:4200
+
+## Cypress Suite (Sprint 2)
+**Test File:**  
+`frontend/cypress/e2e/smoke-login.cy.ts`
+
+### What the Cypress suite validates
+The Cypress tests focus on **UI correctness** and **form behavior** without requiring a successful backend login response.
+
+**Key scenarios tested (Login Page):**
+- Login page renders correctly (title, subtitle, structure)
+- Email input behavior:
+  - placeholder, type, autocomplete, clearing input
+  - invalid email shows validation message
+- Password input behavior:
+  - placeholder, autocomplete, minlength validation
+  - required validation error
+- Submit button behavior:
+  - disabled while form is invalid
+  - enabled only when form is valid
+  - has correct CSS classes and attributes
+- Password visibility toggle:
+  - exists and switches icon state
+  - toggles visibility twice returns to original state
+- Navigation:
+  - “Create Account” navigates to `/register`
+  - “Back to Home” navigates to `/`
+
+---
+
+# Frontend Unit Tests (Angular)
+
+Unit tests were written using Angular’s testing utilities with Jasmine/Karma. The goal was to cover frontend logic at the **function level** and to follow the guideline:  
+> **Aim for a 1:1 unit test-to-function ratio** where possible.
+
+## Unit Test Targets (examples used in Sprint 2)
+- **AuthService**
+  - `isAuthenticated()`
+  - `getCurrentUser()`
+  - `logout()`
+- **PostService**
+  - `getUserPosts(userId)`
+
+> Note: Unit tests are structured to validate logic deterministically (URL construction, local storage behavior, return values) without relying on real backend state.
+
+---
+
+# Run Instructions (Frontend)
+
+## Start Frontend
+```bash
+cd frontend
+npm install
+ng serve
+```
+
+Frontend runs at:
+- http://localhost:4200
+
+## Run Unit Tests
+```bash
+cd frontend
+ng test --watch=false
+```
+
+## Run Cypress Tests
+1) Start Angular:
+```bash
+cd frontend
+ng serve
+```
+
+2) Run Cypress headless:
+```bash
+cd frontend
+npm run cy:run
+```
+
+---
+
+# Demo (Video Requirements – Frontend Portion)
+
+In the narrated presentation, demonstrate:
+
+### UI Functionality
+- Login page:
+  - form validations (invalid email, short password)
+  - password visibility toggle
+  - navigation to Register and Home
+- Profile page:
+  - profile button navigation from header
+  - user information display
+  - posts section with empty state or populated posts (depending on seeded data)
+
+### Test Results
+- Show unit test results:
+  - `ng test --watch=false`
+- Show Cypress results:
+  - `npm run cy:run`
+
+### Suggested Split for Team Narration
+- **Member 1:** UI walkthrough + integration points (Login/Profile)
+- **Member 2:** Testing walkthrough (unit tests + Cypress run output)
+
+---
+
+# Future Improvements (Frontend)
+- Add unit tests for additional components (community list, feed, post detail, comments)
+- Add Cypress E2E tests for:
+  - Register flow
+  - Create post flow
+  - Comment flow
+  - Vote interactions
+- Improve test stability by adding dedicated `data-cy` selectors for key UI elements
+- Add profile edit flow UI and tests
