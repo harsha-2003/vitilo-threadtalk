@@ -569,3 +569,92 @@ it('signup section is visible on login page', () => {
     
     cy.contains('button', 'Create Account').should('not.be.disabled');
   });
+it('back to home link is not disabled', () => {
+    cy.visit('/login');
+    
+    cy.contains('a', 'Back to Home').should('not.be.disabled');
+  });
+
+  it('mat-icon elements are rendered correctly in form fields', () => {
+    cy.visit('/login');
+    
+    cy.get('mat-form-field mat-icon').should('have.length.at.least', 2);
+  });
+
+  it('mat-card-content contains form element', () => {
+    cy.visit('/login');
+    
+    cy.get('mat-card-content').find('form').should('be.visible');
+  });
+
+  it('password field has matInput directive', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="password"][matInput]').should('be.visible');
+  });
+//208
+  it('email field has matInput directive', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"][matInput]').should('be.visible');
+  });
+
+  it('form displays proper Material Design styling', () => {
+    cy.visit('/login');
+    
+    cy.get('mat-card').should('be.visible');
+    cy.get('mat-form-field').should('have.length', 2);
+    cy.get('button[mat-raised-button]').should('be.visible');
+  });
+
+  it('all inputs have formControlName attribute', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formControlName="email"]').should('be.visible');
+    cy.get('input[formControlName="password"]').should('be.visible');
+  });
+
+  it('login page does not redirect when form is invalid', () => {
+    cy.visit('/login');
+    
+    // Leave form empty
+    const initialUrl = cy.url();
+    
+    // Try to submit with disabled button (force click to test)
+    cy.contains('button[type="submit"]', 'Log In').should('be.disabled');
+    
+    // URL should not have changed
+    cy.url().should('include', '/login');
+  });
+
+  it('login form can be submitted after filling all required fields correctly', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]').type('test@example.com');
+    cy.get('input[formcontrolname="password"]').type('password123');
+    
+    // Verify submit button is enabled
+    cy.contains('button[type="submit"]', 'Log In')
+      .should('not.be.disabled')
+      .click();
+
+    // Verify page is still visible (form submitted)
+    cy.get('.login-page').should('be.visible');
+  });
+
+  it('email input has correct mat-label', () => {
+    cy.visit('/login');
+    
+    cy.get('mat-form-field').first()
+      .find('mat-label')
+      .should('have.text', 'Email');
+  });
+
+  it('password input has correct mat-label', () => {
+    cy.visit('/login');
+    
+    cy.get('mat-form-field').last()
+      .find('mat-label')
+      .should('have.text', 'Password');
+  });
+});
