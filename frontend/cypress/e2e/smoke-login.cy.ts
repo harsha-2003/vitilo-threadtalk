@@ -123,3 +123,9 @@ it('"Create Account" button preserves form state when navigating away', () => {
       .should('be.visible')
       .should('contain', 'Log In');
   });
+  it('email input has correct placeholder text', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]')
+      .should('have.attr', 'placeholder', 'your.email@ufl.edu');
+  });
