@@ -264,3 +264,30 @@ it('password input has correct placeholder text', () => {
       .find('mat-icon')
       .should('contain', 'visibility_off');
   });
+// FORM STRUCTURE TESTS
+  it('login card is displayed with proper styling', () => {
+    cy.visit('/login');
+    
+    cy.get('.login-card').should('be.visible');
+  });
+
+  it('logo section is displayed on login page', () => {
+    cy.visit('/login');
+    
+    cy.get('.logo-section').should('be.visible');
+    cy.get('.logo-section svg').should('be.visible');
+  });
+
+  it('mat-card-header contains correct content', () => {
+    cy.visit('/login');
+    
+    cy.get('mat-card-header').should('be.visible');
+    cy.get('mat-card-title').should('contain', 'Welcome Back');
+    cy.get('mat-card-subtitle').should('contain', 'Log in to Vitilo ThreadTalk');
+  });
+
+  it('login form has two form fields', () => {
+    cy.visit('/login');
+    
+    cy.get('mat-form-field').should('have.length', 2);
+  });
