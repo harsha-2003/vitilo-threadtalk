@@ -1,0 +1,64 @@
+<div class="create-community-dialog">
+  <h2 mat-dialog-title>
+    <mat-icon>add_circle_outline</mat-icon>
+    Create a Community
+  </h2>
+
+  <mat-dialog-content>
+    <form [formGroup]="communityForm">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Community Name</mat-label>
+        <span matPrefix>c/</span>
+        <input 
+          matInput 
+          formControlName="name"
+          placeholder="academics"
+          maxlength="21"
+        />
+        <mat-hint>3-21 characters. Letters, numbers, and underscores only.</mat-hint>
+        <mat-error *ngIf="communityForm.get('name')?.hasError('required')">
+          Community name is required
+        </mat-error>
+        <mat-error *ngIf="communityForm.get('name')?.hasError('minlength')">
+          Must be at least 3 characters
+        </mat-error>
+        <mat-error *ngIf="communityForm.get('name')?.hasError('pattern')">
+          Only letters, numbers, and underscores allowed
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Description</mat-label>
+        <textarea 
+          matInput 
+          formControlName="description"
+          rows="4"
+          placeholder="What is your community about?"
+          maxlength="500"
+        ></textarea>
+        <mat-hint align="end">{{ communityForm.get('description')?.value?.length || 0 }}/500</mat-hint>
+        <mat-error *ngIf="communityForm.get('description')?.hasError('required')">
+          Description is required
+        </mat-error>
+      </mat-form-field>
+
+      <div class="info-box">
+        <mat-icon>info</mat-icon>
+        <p>Community names cannot be changed after creation. Choose wisely!</p>
+      </div>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="onCancel()">Cancel</button>
+    <button 
+      mat-raised-button 
+      color="primary"
+      (click)="onSubmit()"
+      [disabled]="communityForm.invalid || isSubmitting"
+    >
+      <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
+      <span *ngIf="!isSubmitting">Create Community</span>
+    </button>
+  </mat-dialog-actions>
+</div>
