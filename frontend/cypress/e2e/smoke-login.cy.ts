@@ -129,3 +129,35 @@ it('"Create Account" button preserves form state when navigating away', () => {
     cy.get('input[formcontrolname="email"]')
       .should('have.attr', 'placeholder', 'your.email@ufl.edu');
   });
+  it('email input has email type', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]')
+      .should('have.attr', 'type', 'email');
+  });
+
+  it('email input has correct autocomplete attribute', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]')
+      .should('have.attr', 'autocomplete', 'email');
+  });
+
+  it('email field can be cleared after typing', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]')
+      .type('test@example.com')
+      .clear()
+      .should('have.value', '');
+  });
+
+  it('email field shows error message when invalid', () => {
+    cy.visit('/login');
+    
+    cy.get('input[formcontrolname="email"]').type('invalid-email');
+    cy.get('input[formcontrolname="email"]').blur();
+    
+    // Should show validation error
+    cy.contains('Please enter a valid email').should('be.visible');
+  });
