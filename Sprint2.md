@@ -289,6 +289,8 @@ In your presentation, demonstrate:
 - Transactional voting improvements  
 - Better error handling standardization  
 - More test coverage
+ # output of unit testing
+ <img width="1140" height="476" alt="Screenshot 2026-03-25 001230" src="https://github.com/user-attachments/assets/3c49fbf9-4490-494e-bcdd-1711b498c794" />
 
 
 # Sprint 2 – Vitilo ThreadTalk Frontend
