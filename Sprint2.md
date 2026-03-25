@@ -290,6 +290,9 @@ In your presentation, demonstrate:
 - Better error handling standardization  
 - More test coverage
  # output of unit testing
+ <img width="1245" height="874" alt="Screenshot 2026-03-25 001122" src="https://github.com/user-attachments/assets/6970df45-3a92-4ec4-b226-ce1e97836326" />
+ <img width="1016" height="870" alt="Screenshot 2026-03-25 001142" src="https://github.com/user-attachments/assets/15a01ea4-1a29-4592-86b5-7e0afbfc4386" />
+<img width="1126" height="885" alt="Screenshot 2026-03-25 001159" src="https://github.com/user-attachments/assets/c5330890-2a89-4a97-a504-43cfd05ff9d5" />
  <img width="1140" height="476" alt="Screenshot 2026-03-25 001230" src="https://github.com/user-attachments/assets/3c49fbf9-4490-494e-bcdd-1711b498c794" />
 
 
