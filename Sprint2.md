@@ -1,5 +1,8 @@
 # Sprint 2 – Vitilo ThreadTalk Backend
-
+## frontend video-
+https://youtu.be/NOLOmEZRB8U
+## Backend video-
+https://youtu.be/j1_ywaUmPpg
 ## Overview
 Vitilo ThreadTalk is a Reddit-style discussion platform built for the Software Engineering project. The backend for Sprint 2 was implemented in Go using Gin, GORM, SQLite, and JWT authentication. This sprint focused on delivering the core backend APIs required for user authentication, communities, posts, comments, voting, and image upload.
 
