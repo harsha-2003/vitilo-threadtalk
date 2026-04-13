@@ -1,0 +1,34 @@
+<div class="page">
+  <mat-card class="card">
+    <div class="top">
+      <button mat-button [routerLink]="['/community', communityId]">
+        <mat-icon>arrow_back</mat-icon>
+        Back to Community
+      </button>
+    </div>
+
+    <h2>Create Post</h2>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Title</mat-label>
+        <input matInput formControlName="title" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Content</mat-label>
+        <textarea matInput rows="7" formControlName="content"></textarea>
+      </mat-form-field>
+
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="form.invalid || isSubmitting"
+      >
+        <mat-spinner diameter="20" *ngIf="isSubmitting"></mat-spinner>
+        <span *ngIf="!isSubmitting">Create</span>
+      </button>
+    </form>
+  </mat-card>
+</div>
