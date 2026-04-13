@@ -363,6 +363,9 @@ Potential work for a future sprint includes:
 - Expanded negative test coverage for edge cases
 
 ## Unit Testing Output Section
-You can include the terminal output from running tests in your final submission under this section.
+<img width="998" height="948" alt="image" src="https://github.com/user-attachments/assets/1634b47b-a07d-455e-97da-702460cba813" />
+<img width="1064" height="998" alt="image" src="https://github.com/user-attachments/assets/88ce44f7-1ee4-4613-8f3b-1545f244eb98" />
+<img width="1108" height="1007" alt="image" src="https://github.com/user-attachments/assets/08638b2a-4844-486d-89a4-b460328f8eb1" />
+
 
 
