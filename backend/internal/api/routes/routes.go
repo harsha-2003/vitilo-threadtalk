@@ -48,8 +48,9 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 			protected.POST("/communities", communityHandler.CreateCommunity)
 			protected.GET("/communities/user/joined", communityHandler.GetUserCommunities) // BEFORE :id route
 			protected.GET("/communities/:id", communityHandler.GetCommunity)
-			protected.POST("/communities/:id/join", communityHandler.JoinCommunity)
-			protected.POST("/communities/:id/leave", communityHandler.LeaveCommunity)
+			protected.POST("/communities/:id/leave", communityHandler.LeaveCommunity)// leave by id
+			protected.POST("/communities/:id/join", communityHandler.JoinCommunity)// join by id
+			
 
 			// Post routes
 			protected.GET("/posts", postHandler.GetPosts)
