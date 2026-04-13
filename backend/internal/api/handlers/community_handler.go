@@ -297,6 +297,7 @@ func (h *CommunityHandler) GetCommunityMembers(c *gin.Context) {
 	})
 }
 // created specifically to user id
+// this is done by the user gets from id  of community
 func (h *CommunityHandler) toCommunityResponse(community models.Community, currentUserID uint) CommunityResponse {
 	// Get member count
 	var memberCount int64
