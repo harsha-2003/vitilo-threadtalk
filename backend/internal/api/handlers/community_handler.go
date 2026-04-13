@@ -131,18 +131,7 @@ countQuery.Count(&total)
 	c.JSON(http.StatusOK, response)
 }
 
-func (h *CommunityHandler) GetCommunity(c *gin.Context) {
-	userID, _ := c.Get("userID")
-	communityID := c.Param("id")
 
-	var community models.Community
-	if err := h.DB.First(&community, communityID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Community not found"})
-		return
-	}
-
-	c.JSON(http.StatusOK, h.toCommunityResponse(community, userID.(uint)))
-}
 
 func (h *CommunityHandler) JoinCommunity(c *gin.Context) {
 	userID, _ := c.Get("userID")
@@ -175,6 +164,19 @@ func (h *CommunityHandler) JoinCommunity(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Successfully joined community"})
+}
+
+func (h *CommunityHandler) GetCommunity(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	communityID := c.Param("id")
+
+	var community models.Community
+	if err := h.DB.First(&community, communityID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Community not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, h.toCommunityResponse(community, userID.(uint)))
 }
 
 func (h *CommunityHandler) LeaveCommunity(c *gin.Context) {
