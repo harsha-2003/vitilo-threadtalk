@@ -732,5 +732,15 @@ it('back to home link is not disabled', () => {
       }
     });
   });
+ it('create community dialog opens and can be closed (without submitting)', () => {
+    cy.visit('/communities');
+    cy.contains('button', 'Create Community').click();
+    // Dialog title should appear (matches your dialog template)
+    cy.contains('Create a Community').should('be.visible');
+    // Close via Cancel button
+    cy.contains('button', 'Cancel').click();
+    // Dialog should disappear
+    cy.contains('Create a Community').should('not.exist');
+  });
   });
 });
