@@ -3,179 +3,196 @@ package handlers
 import (
 	"net/http"
 	"time"
-	
 
 	"github.com/gin-gonic/gin"
 	"github.com/harsha-2003/vitilo-threadtalk/backend/internal/models"
 	"gorm.io/gorm"
 )
 
-type CommentHandler struct {
+type CommunityHandler struct {
 	DB *gorm.DB
 }
 
-type CreateCommentRequest struct {
-	Content  string `json:"content" binding:"required"`
-	PostID   uint   `json:"post_id" binding:"required"`
-	ParentID *uint  `json:"parent_id"`
+type CreateCommunityRequest struct {
+	Name        string `json:"name" binding:"required"`
+	Description string `json:"description"`
+	IconURL     string `json:"icon_url"`
 }
 
-type CommentResponse struct {
-	ID                uint              `json:"id"`
-	Content           string            `json:"content"`
-	VoteCount         int               `json:"vote_count"`
-	CreatedAt         time.Time         `json:"created_at"`
-	UserID            uint              `json:"user_id"`
-	AnonymousUsername string            `json:"anonymous_username"`
-	AvatarHash        string            `json:"avatar_hash"`
-	PostID            uint              `json:"post_id"`
-	ParentID          *uint             `json:"parent_id"`
-	UserVote          int               `json:"user_vote"`
-	Replies           []CommentResponse `json:"replies,omitempty"`
+type CommunityResponse struct {
+	ID          uint      `json:"id"`
+	Name        string    `json:"name"`
+	Description string    `json:"description"`
+	IconURL     string    `json:"icon_url"`
+	MemberCount int       `json:"member_count"`
+	IsMember    bool      `json:"is_member"`
+	CreatedAt   time.Time `json:"created_at"`
 }
 
-func NewCommentHandler(db *gorm.DB) *CommentHandler {
-	return &CommentHandler{DB: db}
+func NewCommunityHandler(db *gorm.DB) *CommunityHandler {
+	return &CommunityHandler{DB: db}
 }
 
-func (h *CommentHandler) loadReplies(commentID uint) ([]models.Comment, error) {
-	var replies []models.Comment
-	if err := h.DB.Where("parent_id = ?", commentID).
-		Preload("User").
-		Order("created_at ASC").
-		Find(&replies).Error; err != nil {
-		return nil, err
-	}
-
-	for i := range replies {
-		children, err := h.loadReplies(replies[i].ID)
-		if err != nil {
-			return nil, err
-		}
-		replies[i].Replies = children
-	}
-
-	return replies, nil
-}
-
-func (h *CommentHandler) GetComments(c *gin.Context) {
-	postID := c.Param("id") // Changed from "post_id" to "id"
-
-	var comments []models.Comment
-	if err := h.DB.Where("post_id = ? AND parent_id IS NULL", postID).
-		Preload("User").
-		Preload("Replies.User").
-		Order("created_at DESC").
-		Find(&comments).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch comments"})
-		return
-	}
-
-	var response []CommentResponse
-	for _, comment := range comments {
-		response = append(response, h.toCommentResponse(comment, c))
-	}
-
-	c.JSON(http.StatusOK, response)
-}
-
-func (h *CommentHandler) CreateComment(c *gin.Context) {
+func (h *CommunityHandler) CreateCommunity(c *gin.Context) {
 	userID, _ := c.Get("userID")
 
-	var req CreateCommentRequest
+	var req CreateCommunityRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Validate post exists
-	var post models.Post
-	if err := h.DB.First(&post, req.PostID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Post not found"})
+	// Check if community name already exists
+	var existingCommunity models.Community
+	if err := h.DB.Where("name = ?", req.Name).First(&existingCommunity).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Community name already exists"})
 		return
 	}
 
-	// If parent comment specified, validate it exists
-	if req.ParentID != nil {
-		var parentComment models.Comment
-		if err := h.DB.First(&parentComment, *req.ParentID).Error; err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"error": "Parent comment not found"})
-			return
-		}
+	community := models.Community{
+		Name:        req.Name,
+		Description: req.Description,
+		IconURL:     req.IconURL,
 	}
 
-	comment := models.Comment{
-		Content:   req.Content,
-		UserID:    userID.(uint),
-		PostID:    req.PostID,
-		ParentID:  req.ParentID,
-		VoteCount: 0,
-	}
-
-	if err := h.DB.Create(&comment).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create comment"})
+	if err := h.DB.Create(&community).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create community"})
 		return
 	}
 
-	// Load user relationship
-	h.DB.Preload("User").First(&comment, comment.ID)
+	// Auto-join the creator
+	member := models.CommunityMember{
+		UserID:      userID.(uint),
+		CommunityID: community.ID,
+		JoinedAt:    time.Now(),
+	}
+	h.DB.Create(&member)
 
-	c.JSON(http.StatusCreated, h.toCommentResponse(comment, c))
+	c.JSON(http.StatusCreated, h.toCommunityResponse(community, userID.(uint)))
 }
 
-func (h *CommentHandler) DeleteComment(c *gin.Context) {
+func (h *CommunityHandler) GetCommunities(c *gin.Context) {
 	userID, _ := c.Get("userID")
-	commentID := c.Param("id")
 
-	var comment models.Comment
-	if err := h.DB.First(&comment, commentID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Comment not found"})
+	var communities []models.Community
+	if err := h.DB.Find(&communities).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch communities"})
 		return
 	}
 
-	// Check ownership
-	if comment.UserID != userID.(uint) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "You can only delete your own comments"})
-		return
+	var response []CommunityResponse
+	for _, community := range communities {
+		response = append(response, h.toCommunityResponse(community, userID.(uint)))
 	}
 
-	if err := h.DB.Delete(&comment).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete comment"})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{"message": "Comment deleted successfully"})
+	c.JSON(http.StatusOK, response)
 }
 
-func (h *CommentHandler) toCommentResponse(comment models.Comment, c *gin.Context) CommentResponse {
+func (h *CommunityHandler) GetCommunity(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	communityID := c.Param("id")
+
+	var community models.Community
+	if err := h.DB.First(&community, communityID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Community not found"})
+		return
+	}
+
+	c.JSON(http.StatusOK, h.toCommunityResponse(community, userID.(uint)))
+}
+
+func (h *CommunityHandler) JoinCommunity(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	communityID := c.Param("id")
+
+	// Check if community exists
+	var community models.Community
+	if err := h.DB.First(&community, communityID).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Community not found"})
+		return
+	}
+
+	// Check if already a member
+	var existingMember models.CommunityMember
+	if err := h.DB.Where("user_id = ? AND community_id = ?", userID, communityID).
+		First(&existingMember).Error; err == nil {
+		c.JSON(http.StatusConflict, gin.H{"error": "Already a member"})
+		return
+	}
+
+	member := models.CommunityMember{
+		UserID:      userID.(uint),
+		CommunityID: community.ID,
+		JoinedAt:    time.Now(),
+	}
+
+	if err := h.DB.Create(&member).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to join community"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully joined community"})
+}
+
+func (h *CommunityHandler) LeaveCommunity(c *gin.Context) {
+	userID, _ := c.Get("userID")
+	communityID := c.Param("id")
+
+	result := h.DB.Where("user_id = ? AND community_id = ?", userID, communityID).
+		Delete(&models.CommunityMember{})
+
+	if result.Error != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to leave community"})
+		return
+	}
+
+	if result.RowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Not a member of this community"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "Successfully left community"})
+}
+
+func (h *CommunityHandler) GetUserCommunities(c *gin.Context) {
 	userID, _ := c.Get("userID")
 
-	// Get user vote
-	var vote models.Vote
-	userVote := 0
-	if err := h.DB.Where("user_id = ? AND comment_id = ?", userID, comment.ID).First(&vote).Error; err == nil {
-		userVote = vote.Value
+	var members []models.CommunityMember
+	if err := h.DB.Where("user_id = ?", userID).
+		Preload("Community").
+		Find(&members).Error; err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to fetch communities"})
+		return
 	}
 
-	response := CommentResponse{
-		ID:                comment.ID,
-		Content:           comment.Content,
-		VoteCount:         comment.VoteCount,
-		CreatedAt:         comment.CreatedAt,
-		UserID:            comment.UserID,
-		AnonymousUsername: comment.User.AnonymousUsername,
-		AvatarHash:        comment.User.AvatarHash,
-		PostID:            comment.PostID,
-		ParentID:          comment.ParentID,
-		UserVote:          userVote,
+	var response []CommunityResponse
+	for _, member := range members {
+		response = append(response, h.toCommunityResponse(member.Community, userID.(uint)))
 	}
 
-	// Add replies if they exist
-	if len(comment.Replies) > 0 {
-		for _, reply := range comment.Replies {
-			response.Replies = append(response.Replies, h.toCommentResponse(reply, c))
-		}
+	c.JSON(http.StatusOK, response)
+}
+
+func (h *CommunityHandler) toCommunityResponse(community models.Community, currentUserID uint) CommunityResponse {
+	// Get member count
+	var memberCount int64
+	h.DB.Model(&models.CommunityMember{}).Where("community_id = ?", community.ID).Count(&memberCount)
+
+	// Check if current user is a member
+	var membership models.CommunityMember
+	isMember := false
+	if err := h.DB.Where("user_id = ? AND community_id = ?", currentUserID, community.ID).
+		First(&membership).Error; err == nil {
+		isMember = true
 	}
 
-	return response
+	return CommunityResponse{
+		ID:          community.ID,
+		Name:        community.Name,
+		Description: community.Description,
+		IconURL:     community.IconURL,
+		MemberCount: int(memberCount),
+		IsMember:    isMember,
+		CreatedAt:   community.CreatedAt,
+	}
 }
