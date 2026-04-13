@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { catchError, Observable } from 'rxjs';
 import { Post, CreatePostRequest, PostsResponse } from '../../models/post.model';
 import { environment } from '../../environments/environment';
 
@@ -44,4 +44,20 @@ export class PostService {
   votePost(postId: number, value: number): Observable<any> {
     return this.http.post(`${environment.apiUrl}/posts/${postId}/vote`, { value });
   }
+
+  getMyPosts(): Observable<any> {
+  return this.http.get(`${environment.apiUrl}/users/posts`);
+}
+  getUserPosts(userId: number) {
+  return this.http.get<{ posts: Post[] }>(`${environment.apiUrl}/users/${userId}/posts`);
+}
+getPostsByCommunity(communityId: number) {
+  // Try endpoint A first (recommended)
+  return this.http.get<any[]>(`${environment.apiUrl}/communities/${communityId}/posts`).pipe(
+    catchError(() => {
+      // Fallback to endpoint B
+      return this.http.get<any[]>(`${environment.apiUrl}/posts?community_id=${communityId}`);
+    })
+  );
+}
 }
