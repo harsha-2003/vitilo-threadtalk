@@ -1,0 +1,85 @@
+<div class="page">
+  <div class="container">
+    <button mat-button routerLink="/communities">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Communities
+    </button>
+
+    <div *ngIf="isLoading" class="loading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Loading community...</p>
+    </div>
+
+    <div *ngIf="!isLoading && error" class="error">
+      {{ error }}
+    </div>
+
+    <mat-card *ngIf="!isLoading && !error && community" class="card">
+      <div class="header">
+        <img class="avatar" [src]="getCommunityIcon()" [alt]="community.name" />
+
+        <div class="info">
+          <h1>c/{{ community.name }}</h1>
+          <p>{{ community.description }}</p>
+          <div class="meta">
+            <mat-icon>people</mat-icon>
+            <span>{{ community.member_count }} members</span>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button
+            mat-raised-button
+            color="primary"
+            [routerLink]="['/community', community.id, 'create-post']"
+          >
+            <mat-icon>add</mat-icon>
+            Create Post
+          </button>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Temporary text so you can confirm route works -->
+   <div class="posts-section" *ngIf="community">
+  <h2>Posts</h2>
+
+  <div *ngIf="isLoadingPosts" class="loading">
+    <mat-spinner diameter="40"></mat-spinner>
+    <p>Loading posts...</p>
+  </div>
+
+  <div *ngIf="!isLoadingPosts && posts.length === 0" class="empty">
+    <h3>This community doesn't have any posts yet</h3>
+    <p>Make one and get this feed started.</p>
+    <button
+      mat-raised-button
+      color="primary"
+      [routerLink]="['/community', community.id, 'create-post']"
+    >
+      Create Post
+    </button>
+  </div>
+
+  <div class="posts" *ngIf="!isLoadingPosts && posts.length > 0">
+    <mat-card class="post-card" *ngFor="let post of posts">
+      <mat-card-title>{{ post.title }}</mat-card-title>
+      <mat-card-content>
+        <p>{{ post.content }}</p>
+      </mat-card-content>
+      <mat-card-actions>
+        <button mat-button [routerLink]="['/post', post.id]">
+          View Post
+        </button>
+        <span class="spacer"></span>
+
+    <button mat-button color="warn" (click)="deletePost(post)">
+      <mat-icon>delete</mat-icon>
+      Delete
+    </button>
+      </mat-card-actions>
+    </mat-card>
+  </div>
+</div>
+  </div>
+</div>
