@@ -1,4 +1,11 @@
+# Sprint 3:
+
+Frontend Video - https://youtu.be/D7Wzj7w16eU
+
+Backend Video - https://youtu.be/_bM9zyhTGt4
+
 # Sprint 3 Backend Documentation
+
 
 ## Overview
 Vitilo ThreadTalk is a Reddit-style discussion platform built for the Software Engineering project. The backend for Sprint 3 continues the Go-based API developed in earlier sprints using Gin, GORM, SQLite, and JWT authentication. This sprint focused on extending the backend with additional community workflows, richer post and comment interactions, stronger moderation-style delete operations, and expanded route-level test coverage.
@@ -693,6 +700,11 @@ During demo/presentation, show:
 - Add pagination controls on community posts list
 - Improve consistency of API response shapes and frontend typing
 
+
+<img width="1146" height="597" alt="image" src="https://github.com/user-attachments/assets/ea0c99bc-f003-446f-9013-bd316a635003" />
+<img width="918" height="717" alt="image" src="https://github.com/user-attachments/assets/6dd566da-9ea8-4bd2-b05d-1f34bf42568d" />
+<img width="849" height="687" alt="image" src="https://github.com/user-attachments/assets/e8fcffaa-35fa-49e3-b3f9-6389dc9c583f" />
+<img width="903" height="588" alt="image" src="https://github.com/user-attachments/assets/01504f19-428b-49a9-8882-23d771d08511" />
 
 
 
