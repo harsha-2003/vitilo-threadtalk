@@ -712,5 +712,25 @@ it('back to home link is not disabled', () => {
     cy.contains('All Communities').should('be.visible');
     cy.contains('My Communities').should('be.visible');
   });
+        it('switches to "My Communities" tab and shows empty state OR community cards', () => {
+    cy.visit('/communities');
+
+    cy.contains('My Communities').click();
+
+    // Either empty state appears or at least one community card exists.
+    cy.get('body').then(($body) => {
+      const bodyText = $body.text();
+
+      const emptyStateShown =
+        bodyText.includes('No communities yet') ||
+        bodyText.includes('Join communities to see them here');
+
+      if (emptyStateShown) {
+        expect(emptyStateShown).to.eq(true);
+      } else {
+        cy.get('mat-card.community-card').should('have.length.at.least', 1);
+      }
+    });
+  });
   });
 });
