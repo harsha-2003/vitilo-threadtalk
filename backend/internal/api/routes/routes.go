@@ -68,6 +68,7 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 			// Comment routes
 			protected.POST("/comments", commentHandler.CreateComment)
 			protected.DELETE("/comments/:id", commentHandler.DeleteComment)
+			
 
 			protected.GET("/profile/me", authHandler.GetMyProfile)
 			protected.GET("/users/:id/profile", authHandler.GetUserProfile)
