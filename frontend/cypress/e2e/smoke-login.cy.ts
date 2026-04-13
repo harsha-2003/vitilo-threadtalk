@@ -685,5 +685,14 @@ it('back to home link is not disabled', () => {
     // Search input exists
     cy.contains('mat-label', 'Search communities').should('be.visible');
   });
+    it('shows the communities page header and create community button', () => {
+    cy.visit('/communities');
+
+    cy.get('.communities-page').should('be.visible');
+    cy.contains('h1', 'Communities').should('be.visible');
+    cy.contains('Discover and join communities at UF').should('be.visible');
+
+    cy.contains('button', 'Create Community').should('be.visible');
+  });
   });
 });
