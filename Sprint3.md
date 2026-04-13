@@ -368,4 +368,333 @@ Potential work for a future sprint includes:
 <img width="1108" height="1007" alt="image" src="https://github.com/user-attachments/assets/08638b2a-4844-486d-89a4-b460328f8eb1" />
 
 
+# Sprint 3 Frontend Documentation — Vitilo ThreadTalk
+
+## Overview
+Vitilo ThreadTalk is a Reddit-style discussion platform built for a Software Engineering project. The **Sprint 3 Frontend** continues the Angular-based UI developed in earlier sprints and extends it to support richer **community workflows** and **community-scoped posts**, matching the Sprint 3 backend capabilities.
+
+This sprint focused on:
+- A complete Communities browsing experience
+- A dedicated Community page (`/community/:id`) to display community details and posts
+- A dedicated “Create Post” flow inside a community (`/community/:id/create-post`)
+- Join/leave community UX integration
+- Cypress end-to-end (smoke/unit-style) UI tests for key flows
+
+> Backend reference: Sprint 3 Go API using Gin, GORM, SQLite, JWT auth.
+
+---
+
+## Frontend Technology Stack
+- **Framework:** Angular (standalone components)
+- **Language:** TypeScript
+- **UI Library:** Angular Material
+- **Routing:** Angular Router
+- **HTTP:** Angular HttpClient
+- **State:** Component-level state + service calls (no global store)
+- **Testing (E2E / UI tests):** Cypress (`cypress run`)
+- **Styling:** SCSS
+
+---
+
+## Sprint 3 Frontend Work Completed
+
+### Communities
+Implemented and stabilized the community workflow:
+- Browse all communities (`/communities`)
+- View communities joined by the current user (tab inside `/communities`)
+- Search/filter communities client-side
+- Create a new community (Angular Material dialog)
+- Join/leave communities from the list UI
+- Navigate to community page from community cards (`/community/:id`)
+
+### Community Page (Detail)
+Created a dedicated Community page that displays:
+- Community header (name, description, icon)
+- Member count
+- Posts belonging to that community
+- “Create Post” CTA linking to `/community/:id/create-post`
+
+### Community Posts
+Added community-scoped posting and retrieval:
+- Create a post for a specific community
+- Fetch posts filtered by `community_id`
+- Display community posts under the community page
+
+### Delete Posts (Community Page)
+Added a post deletion option to the community posts list:
+- Uses `DELETE /api/posts/:id` via `PostService.deletePost()`
+- Removes deleted post from UI list without full reload
+- Backend enforces ownership validation (only author can delete)
+
+---
+
+## Frontend Route Documentation
+
+### Base URL (Frontend)
+By default:
+- `http://localhost:4200`
+
+### Main Routes
+| Route | Description |
+|------|-------------|
+| `/` | Landing page |
+| `/login` | Login page |
+| `/register` | Register page |
+| `/feed` | Global feed posts |
+| `/post/:id` | Post detail page |
+| `/communities` | Communities list page (All + My Communities tabs) |
+| `/community/:id` | Community detail page (header + community posts) |
+| `/community/:id/create-post` | Create a post specifically inside the community |
+| `/profile` | Profile page |
+
+> Important: Community routes must be defined **above** the wildcard `**` route in `app.routes.ts`.
+
+Example community route configuration:
+
+```ts
+{
+  path: 'community/:id',
+  loadComponent: () =>
+    import('./features/communities/community-detail/community-detail.component')
+      .then(m => m.CommunityDetailComponent)
+},
+{
+  path: 'community/:id/create-post',
+  loadComponent: () =>
+    import('./features/communities/community-create-post/community-create-post.component')
+      .then(m => m.CommunityCreatePostComponent)
+},
+```
+
+---
+
+## Services Used (Core Services Layer)
+
+All services are organized under:
+- `src/app/core/services`
+
+### CommunityService (key methods)
+- `getCommunities()`
+- `getCommunity(id)`
+- `createCommunity(...)`
+- `joinCommunity(id)`
+- `leaveCommunity(id)`
+- `getUserCommunities()`
+
+### PostService (key methods)
+Located at:
+- `src/app/core/services/post.service.ts`
+
+Key methods used in Sprint 3 frontend:
+- `getPosts(page, limit, sort, communityId?)`
+- `createPost(request)`
+- `deletePost(id)`
+
+#### Fetch posts by community (recommended approach)
+Sprint 3 uses the existing pagination endpoint with `community_id` filter:
+- `GET /api/posts?community_id=:id`
+
+Frontend leverages:
+- `PostService.getPosts(..., communityId)`
+
+---
+
+## Community Posts Integration (End-to-End)
+
+### Creating a Post in a Community
+UI flow:
+1. User navigates to `/community/:id`
+2. Clicks **Create Post**
+3. Fills title + content
+4. Submits the form
+5. Redirects back to `/community/:id`
+6. Newly created post appears in the community posts list
+
+**Critical requirement:** the create post payload must include the community id:
+
+```json
+{
+  "title": "My post title",
+  "content": "My post content",
+  "community_id": 1
+}
+```
+
+---
+
+## UI Components Added / Updated (Sprint 3)
+
+### CommunityListComponent
+Path:
+- `src/app/features/communities/community-list/community-list.component.ts`
+
+Responsibilities:
+- Render All Communities + My Communities
+- Search/filter
+- Join/leave communities
+- Open Create Community dialog
+- Navigate to `/community/:id` via router
+
+### CommunityDetailComponent
+Path:
+- `src/app/features/communities/community-detail/community-detail.component.ts`
+
+Responsibilities:
+- Load community header data by ID
+- Load community posts filtered by ID
+- Render posts and “Create Post” CTA
+- Support post deletion (frontend) using PostService + backend ownership rules
+
+### CommunityCreatePostComponent
+Path:
+- `src/app/features/communities/community-create-post/community-create-post.component.ts`
+
+Responsibilities:
+- Create a new post in a specific community
+- Ensure `community_id` is included
+- Redirect to `/community/:id` after success
+
+---
+
+## Cypress UI Tests (Sprint 3)
+Cypress tests were extended in Sprint 3 to include Communities page smoke coverage and stable UI assertions.
+
+### Test Runner
+From `frontend/`:
+```bash
+npm run cy:run
+```
+
+### Test File
+- `cypress/e2e/smoke-login.cy.ts`
+
+### Added Test Block (Sprint 3)
+The following tests were added under:
+
+`describe('ThreadTalk - Communities & Community Posts (E2E)', () => { ... })`
+
+> These tests were written to avoid fragile selectors and to assert stable UI behavior.
+
+#### Cypress Test Cases (Sprint 3 Frontend)
+```ts
+describe('ThreadTalk - Communities & Community Posts (E2E)', () => {
+  it('shows the communities page header and create community button', () => {
+    cy.visit('/communities');
+
+    cy.get('.communities-page').should('be.visible');
+    cy.contains('h1', 'Communities').should('be.visible');
+    cy.contains('Discover and join communities at UF').should('be.visible');
+
+    cy.contains('button', 'Create Community').should('be.visible');
+  });
+
+  it('shows the search field and allows typing + clearing the query', () => {
+    cy.visit('/communities');
+
+    cy.get('input[placeholder="Search by name or description"]')
+      .should('be.visible')
+      .type('test')
+      .should('have.value', 'test');
+
+    // Clear using the suffix close icon button (only appears when searchQuery is non-empty)
+    cy.get('button[mat-icon-button][matSuffix]').click();
+    cy.get('input[placeholder="Search by name or description"]').should('have.value', '');
+  });
+
+  it('renders both tabs: All Communities and My Communities', () => {
+    cy.visit('/communities');
+
+    cy.contains('All Communities').should('be.visible');
+    cy.contains('My Communities').should('be.visible');
+  });
+
+  it('switches to "My Communities" tab and shows empty state OR community cards', () => {
+    cy.visit('/communities');
+
+    cy.contains('My Communities').click();
+
+    cy.get('body').then(($body) => {
+      const bodyText = $body.text();
+
+      const emptyStateShown =
+        bodyText.includes('No communities yet') ||
+        bodyText.includes('Join communities to see them here');
+
+      if (emptyStateShown) {
+        expect(emptyStateShown).to.eq(true);
+      } else {
+        cy.get('mat-card.community-card').should('have.length.at.least', 1);
+      }
+    });
+  });
+
+  it('create community dialog opens and can be closed (without submitting)', () => {
+    cy.visit('/communities');
+
+    cy.contains('button', 'Create Community').click();
+    cy.contains('Create a Community').should('be.visible');
+
+    cy.contains('button', 'Cancel').click();
+    cy.contains('Create a Community').should('not.exist');
+  });
+});
+```
+
+---
+
+## Notes / Known Limitations
+- Cypress navigation tests that click “View Community” can fail if the UI text differs or if the element is rendered as an `<a>` instead of a `<button>`.  
+  Recommendation: add stable selectors like `data-cy="view-community"` to community cards.
+
+- Community member list (actual users) is not rendered if no backend endpoint exists for `/api/communities/:id/members`. The UI displays **member_count**.
+
+- Delete Post is protected by backend ownership validation. If the logged-in user is not the owner, backend should return a `403` and UI should show an error message.
+
+---
+
+## How to Run the Frontend
+From `frontend/`:
+```bash
+npm install
+npm start
+```
+
+By default:
+- Frontend: `http://localhost:4200`
+
+---
+
+## How to Run Cypress Tests
+From `frontend/`:
+```bash
+npm run cy:run
+```
+
+---
+
+## Sprint 3 Demo Checklist (Frontend)
+During demo/presentation, show:
+1. Login / register
+2. Navigate to `/communities`
+3. Search communities
+4. Open and close “Create Community” dialog
+5. Join a community
+6. Click into community page `/community/:id`
+7. Create a post in a community
+8. Verify post appears under that community
+9. Delete a post (as owner)
+
+---
+
+## Future Improvements
+- Add stable `data-cy` selectors for Cypress
+- Add community members list UI if backend exposes members endpoint
+- Add edit/update post and edit/update comment features
+- Add pagination controls on community posts list
+- Improve consistency of API response shapes and frontend typing
+
+
+
+
+
 
