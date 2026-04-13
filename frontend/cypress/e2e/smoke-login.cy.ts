@@ -694,5 +694,23 @@ it('back to home link is not disabled', () => {
 
     cy.contains('button', 'Create Community').should('be.visible');
   });
+       it('shows the search field and allows typing + clearing the query', () => {
+    cy.visit('/communities');
+
+    cy.get('input[placeholder="Search by name or description"]').should('be.visible')
+      .type('test')
+      .should('have.value', 'test');
+
+    // Clear using the close icon button (matSuffix) if it appears
+    cy.get('button[mat-icon-button][matSuffix]').click();
+    cy.get('input[placeholder="Search by name or description"]').should('have.value', '');
+  });
+
+  it('renders both tabs: All Communities and My Communities', () => {
+    cy.visit('/communities');
+
+    cy.contains('All Communities').should('be.visible');
+    cy.contains('My Communities').should('be.visible');
+  });
   });
 });
