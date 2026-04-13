@@ -656,5 +656,34 @@ it('back to home link is not disabled', () => {
     cy.get('mat-form-field').last()
       .find('mat-label')
       .should('have.text', 'Password');
+    describe('ThreadTalk - Communities & Community Posts (E2E)', () => {
+  /**
+   * Helper: login via UI (works without needing internal tokens).
+   * If your app allows communities page without login, you can remove this.
+   */
+  const loginUI = () => {
+    cy.visit('/login');
+    cy.get('input[formcontrolname="email"]').clear().type('test@example.com');
+    cy.get('input[formcontrolname="password"]').clear().type('password123');
+    cy.contains('button[type="submit"]', 'Log In').click();
+
+    // We don't assert success strongly because depends on backend,
+    // but ensure page doesn't crash.
+    cy.get('body').should('be.visible');
+  };
+
+  it('loads communities page and shows tabs', () => {
+    // loginUI(); // uncomment if communities requires auth
+    cy.visit('/communities');
+
+    cy.get('.communities-page').should('be.visible');
+    cy.contains('Communities').should('be.visible');
+
+    cy.contains('All Communities').should('be.visible');
+    cy.contains('My Communities').should('be.visible');
+
+    // Search input exists
+    cy.contains('mat-label', 'Search communities').should('be.visible');
+  });
   });
 });
