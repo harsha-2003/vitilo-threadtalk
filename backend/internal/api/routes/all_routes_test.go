@@ -41,7 +41,7 @@ func setupTestEnv(t *testing.T) *testEnv {
 	os.Setenv("UF_EMAIL_DOMAIN", "ufl.edu")
 	_ = os.MkdirAll("uploads", 0755)
 
-	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open(fmt.Sprintf("file:%s?mode=memory&cache=shared", t.Name())), &gorm.Config{})
 	if err != nil {
 		t.Fatalf("failed to open sqlite memory db: %v", err)
 	}
@@ -534,11 +534,11 @@ func TestGetCommunityByID_InvalidID_ReturnsNotFound(t *testing.T) {
 
 func TestGetUsersCommunities_ReturnsOK(t *testing.T) {
 	env := setupTestEnv(t)
-	token, userID := registerAndGetToken(t, env, "usercommunities@ufl.edu")
+	token, _ := registerAndGetToken(t, env, "usercommunities@ufl.edu")
 	_ = createCommunityWithToken(t, env, token, "user-comm-1")
 	_ = createCommunityWithToken(t, env, token, "user-comm-2")
 
-	w := performJSONRequest(env.router, http.MethodGet, fmt.Sprintf("/api/users/%d/communities", userID), nil, token)
+	w := performJSONRequest(env.router, http.MethodGet, "/api/communities/user/joined", nil, token)
 	if w.Code != http.StatusOK {
 		t.Fatalf("expected 200, got %d body=%s", w.Code, w.Body.String())
 	}
