@@ -42,41 +42,31 @@ func SetupRoutes(r *gin.Engine, db *gorm.DB) {
 		{
 			// User routes
 			protected.GET("/auth/me", authHandler.GetCurrentUser)
+			protected.GET("/users/:id/posts", postHandler.GetUserPosts)
 
 			// Community routes
 			protected.GET("/communities", communityHandler.GetCommunities)
 			protected.POST("/communities", communityHandler.CreateCommunity)
 			protected.GET("/communities/user/joined", communityHandler.GetUserCommunities) // BEFORE :id route
 			protected.GET("/communities/:id", communityHandler.GetCommunity)
-			protected.POST("/communities/:id/leave", communityHandler.LeaveCommunity)// leave by id
-			protected.POST("/communities/:id/join", communityHandler.JoinCommunity)// join by id
-			
+			protected.POST("/communities/:id/join", communityHandler.JoinCommunity)
+			protected.POST("/communities/:id/leave", communityHandler.LeaveCommunity)
 
 			// Post routes
 			protected.GET("/posts", postHandler.GetPosts)
 			protected.POST("/posts", postHandler.CreatePost)
 			protected.POST("/posts/upload", postHandler.UploadImage) // BEFORE :id route
 			protected.GET("/posts/:id", postHandler.GetPost)
-			protected.PUT("/posts/:id", postHandler.UpdatePost)
 			protected.DELETE("/posts/:id", postHandler.DeletePost)
-			protected.GET("/posts/:id/comments", commentHandler.GetComments) // Changed from :post_id to :id
+
+			// Comment routes (ONLY ONCE)
+			protected.GET("/posts/:id/comments", commentHandler.GetComments)
+			protected.POST("/comments", commentHandler.CreateComment)
+			protected.DELETE("/comments/:id", commentHandler.DeleteComment)
 
 			// Vote routes
 			protected.POST("/posts/:id/vote", voteHandler.VotePost)
 			protected.POST("/comments/:id/vote", voteHandler.VoteComment)
-
-			// Comment routes
-			protected.POST("/comments", commentHandler.CreateComment)
-			protected.DELETE("/comments/:id", commentHandler.DeleteComment)
-			
-
-			protected.GET("/profile/me", authHandler.GetMyProfile)
-			protected.GET("/users/:id/profile", authHandler.GetUserProfile)
-			protected.GET("/profile/me/activity", authHandler.GetMyActivity)
-
-			protected.POST("/posts/:id/save", postHandler.SavePost)
-            protected.DELETE("/posts/:id/save", postHandler.UnsavePost)
-            protected.GET("/profile/me/saved-posts", postHandler.GetSavedPosts)
 		}
 	}
 }
