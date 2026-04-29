@@ -42,17 +42,6 @@ type UserResponse struct {
 	AvatarHash        string `json:"avatar_hash"`
 }
 
-type ProfileSummaryResponse struct {
-	ID                uint   `json:"id"`
-	Email             string `json:"email"`
-	AnonymousUsername string `json:"anonymous_username"`
-	AvatarHash        string `json:"avatar_hash"`
-	PostCount         int64  `json:"post_count"`
-	CommentCount      int64  `json:"comment_count"`
-	CommunityCount    int64  `json:"community_count"`
-	Karma             int64  `json:"karma"`
-}
-
 func NewAuthHandler(db *gorm.DB) *AuthHandler {
 	return &AuthHandler{DB: db}
 }
@@ -120,35 +109,6 @@ func (h *AuthHandler) Register(c *gin.Context) {
 		},
 	})
 }
-func (h *AuthHandler) GetUserProfile(c *gin.Context) {
-	userID := c.Param("id")
-
-	var user models.User
-	if err := h.DB.First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
-
-	var postCount, commentCount, communityCount int64
-	var postVoteSum, commentVoteSum int64
-
-	h.DB.Model(&models.Post{}).Where("user_id = ?", user.ID).Count(&postCount)
-	h.DB.Model(&models.Comment{}).Where("user_id = ?", user.ID).Count(&commentCount)
-	h.DB.Model(&models.CommunityMember{}).Where("user_id = ?", user.ID).Count(&communityCount)
-	h.DB.Model(&models.Post{}).Where("user_id = ?", user.ID).Select("COALESCE(SUM(vote_count), 0)").Scan(&postVoteSum)
-	h.DB.Model(&models.Comment{}).Where("user_id = ?", user.ID).Select("COALESCE(SUM(vote_count), 0)").Scan(&commentVoteSum)
-
-	c.JSON(http.StatusOK, gin.H{
-		"id":                 user.ID,
-		"anonymous_username": user.AnonymousUsername,
-		"avatar_hash":        user.AvatarHash,
-		"created_at":         user.CreatedAt,
-		"post_count":         postCount,
-		"comment_count":      commentCount,
-		"community_count":    communityCount,
-		"karma":              postVoteSum + commentVoteSum,
-	})
-}
 
 func (h *AuthHandler) Login(c *gin.Context) {
 	var req LoginRequest
@@ -187,39 +147,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 		},
 	})
 }
-func (h *AuthHandler) GetMyProfile(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
 
-	var user models.User
-	if err := h.DB.First(&user, userID).Error; err != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
-		return
-	}
-
-	var postCount, commentCount, communityCount int64
-	var postVoteSum, commentVoteSum int64
-
-	h.DB.Model(&models.Post{}).Where("user_id = ?", userID).Count(&postCount)
-	h.DB.Model(&models.Comment{}).Where("user_id = ?", userID).Count(&commentCount)
-	h.DB.Model(&models.CommunityMember{}).Where("user_id = ?", userID).Count(&communityCount)
-	h.DB.Model(&models.Post{}).Where("user_id = ?", userID).Select("COALESCE(SUM(vote_count), 0)").Scan(&postVoteSum)
-	h.DB.Model(&models.Comment{}).Where("user_id = ?", userID).Select("COALESCE(SUM(vote_count), 0)").Scan(&commentVoteSum)
-
-	c.JSON(http.StatusOK, ProfileSummaryResponse{
-		ID:                user.ID,
-		Email:             user.Email,
-		AnonymousUsername: user.AnonymousUsername,
-		AvatarHash:        user.AvatarHash,
-		PostCount:         postCount,
-		CommentCount:      commentCount,
-		CommunityCount:    communityCount,
-		Karma:             postVoteSum + commentVoteSum,
-	})
-}
 func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 	userID, exists := c.Get("userID")
 	if !exists {
@@ -240,42 +168,7 @@ func (h *AuthHandler) GetCurrentUser(c *gin.Context) {
 		AvatarHash:        user.AvatarHash,
 	})
 }
-func (h *AuthHandler) GetMyActivity(c *gin.Context) {
-	userID, exists := c.Get("userID")
-	if !exists {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
-		return
-	}
 
-	var posts []models.Post
-	var comments []models.Comment
-
-	h.DB.Where("user_id = ?", userID).Order("created_at DESC").Find(&posts)
-	h.DB.Where("user_id = ?", userID).Order("created_at DESC").Find(&comments)
-
-	activity := []gin.H{}
-
-	for _, post := range posts {
-		activity = append(activity, gin.H{
-			"type":       "post",
-			"id":         post.ID,
-			"title":      post.Title,
-			"created_at": post.CreatedAt,
-		})
-	}
-
-	for _, comment := range comments {
-		activity = append(activity, gin.H{
-			"type":       "comment",
-			"id":         comment.ID,
-			"content":    comment.Content,
-			"post_id":    comment.PostID,
-			"created_at": comment.CreatedAt,
-		})
-	}
-
-	c.JSON(http.StatusOK, gin.H{"activity": activity})
-}
 // Helper functions
 func generateAnonymousUsername() string {
 	adjectives := []string{"Happy", "Silent", "Brave", "Quick", "Gentle", "Proud", "Clever", "Calm"}
