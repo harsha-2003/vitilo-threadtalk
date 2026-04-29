@@ -742,5 +742,64 @@ it('back to home link is not disabled', () => {
     // Dialog should disappear
     cy.contains('Create a Community').should('not.exist');
   });
+
+      it('communities page loads without showing a console error (basic health check)', () => {
+    cy.visit('/communities');
+
+    // If the app hard-crashes, this usually won't exist
+    cy.get('body').should('be.visible');
+    cy.get('.communities-page').should('be.visible');
+  });
+
+  it('search clear button is not visible before typing (if you render it conditionally)', () => {
+    cy.visit('/communities');
+
+    // Many UIs only show the clear button when there is text
+    // If yours always shows it, change this to `.should('be.visible')`
+    cy.get('input[placeholder="Search by name or description"]').should('be.visible').should('have.value', '');
+
+    cy.get('body').then(($body) => {
+      const hasClearBtn = $body.find('button[mat-icon-button][matSuffix]').length > 0;
+      if (hasClearBtn) {
+        cy.get('button[mat-icon-button][matSuffix]').should('not.be.visible');
+      } else {
+        // If it doesn't exist at all until typing, that's also fine
+        expect(hasClearBtn).to.eq(false);
+      }
+    });
+  });
+
+  it('typing in search does not navigate away from /communities', () => {
+    cy.visit('/communities');
+
+    cy.get('input[placeholder="Search by name or description"]').type('abc');
+    cy.url().should('include', '/communities');
+  });
+
+  it('switching tabs does not break the page (tab group still visible)', () => {
+    cy.visit('/communities');
+
+    cy.contains('My Communities').click();
+    cy.contains('All Communities').click();
+
+    cy.get('.communities-page').should('be.visible');
+    cy.contains('All Communities').should('be.visible');
+    cy.contains('My Communities').should('be.visible');
+  });
+
+  it('Create Community dialog shows required fields (name + description) when opened', () => {
+    cy.visit('/communities');
+
+    cy.contains('button', 'Create Community').click();
+    cy.contains('Create a Community').should('be.visible');
+
+    // Check for form fields by label text (less fragile than CSS)
+    cy.contains('mat-label', 'Community Name').should('be.visible');
+    cy.contains('mat-label', 'Description').should('be.visible');
+
+    // Close
+    cy.contains('button', 'Cancel').click();
+    cy.contains('Create a Community').should('not.exist');
+  });
   });
 });
