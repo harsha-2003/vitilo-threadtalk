@@ -1,0 +1,247 @@
+<div class="post-detail-container">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <mat-spinner diameter="50"></mat-spinner>
+    <p>Loading post...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="error-state">
+    <mat-icon>error_outline</mat-icon>
+    <h3>{{ error }}</h3>
+    <button mat-raised-button color="primary" routerLink="/feed">
+      <mat-icon>home</mat-icon>
+      Go to Home
+    </button>
+  </div>
+
+  <!-- Post Detail Content -->
+  <div *ngIf="!isLoading && !error && post" class="post-detail-content">
+    <!-- Back Button -->
+    <button mat-button class="back-button" (click)="goBack()">
+      <mat-icon>arrow_back</mat-icon>
+      Back to Feed
+    </button>
+
+    <!-- Post Card -->
+    <mat-card class="post-card">
+      <div class="post-wrapper">
+        <!-- Vote Section -->
+        <div class="vote-section">
+          <button 
+            mat-icon-button 
+            class="vote-btn"
+            [class.voted]="post.user_vote === 1"
+            (click)="votePost(post.user_vote === 1 ? 0 : 1)">
+            <mat-icon>arrow_upward</mat-icon>
+          </button>
+          
+          <span class="vote-count" 
+                [class.upvoted]="post.user_vote === 1" 
+                [class.downvoted]="post.user_vote === -1">
+            {{ formatVotes(post.vote_count) }}
+          </span>
+          
+          <button 
+            mat-icon-button 
+            class="vote-btn"
+            [class.voted]="post.user_vote === -1"
+            (click)="votePost(post.user_vote === -1 ? 0 : -1)">
+            <mat-icon>arrow_downward</mat-icon>
+          </button>
+        </div>
+
+        <!-- Post Content -->
+        <div class="post-content">
+          <div class="post-meta">
+            <span class="community">c/{{ post.community_name }}</span>
+            <span class="separator">•</span>
+            <span class="author">u/{{ post.anonymous_username }}</span>
+            <span class="separator">•</span>
+            <span class="time">{{ getTimeAgo(post.created_at) }}</span>
+          </div>
+
+          <h1 class="post-title">{{ post.title }}</h1>
+          
+          <div class="post-body">{{ post.content }}</div>
+
+          <div class="post-stats">
+            <mat-icon>comment</mat-icon>
+            <span>{{ post.comment_count }} comments</span>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+
+    <!-- Add Comment Section -->
+    <mat-card class="add-comment-card">
+      <div class="card-header">
+        <h3>Add a Comment</h3>
+        <p class="comment-as">Comment as <strong>u/{{ currentUser?.anonymous_username }}</strong></p>
+      </div>
+      
+      <form [formGroup]="commentForm" (ngSubmit)="submitComment()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>What are your thoughts?</mat-label>
+          <textarea 
+            matInput 
+            formControlName="content"
+            rows="5"
+            placeholder="Share your thoughts..."
+          ></textarea>
+          <mat-hint>Be respectful and constructive</mat-hint>
+        </mat-form-field>
+
+        <div class="form-actions">
+          <button 
+            mat-raised-button 
+            color="primary" 
+            type="submit"
+            [disabled]="commentForm.invalid || isSubmitting">
+            <mat-icon>send</mat-icon>
+            {{ isSubmitting ? 'Posting...' : 'Comment' }}
+          </button>
+        </div>
+      </form>
+    </mat-card>
+
+    <!-- Comments Section -->
+    <mat-card class="comments-card">
+      <div class="comments-header">
+        <h3>
+          <mat-icon>forum</mat-icon>
+          Comments ({{ comments.length }})
+        </h3>
+        
+        <mat-button-toggle-group 
+          [value]="commentSort"
+          (change)="onSortChange($event)"
+          class="sort-toggle">
+          <mat-button-toggle value="best">Best</mat-button-toggle>
+          <mat-button-toggle value="new">New</mat-button-toggle>
+          <mat-button-toggle value="top">Top</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+
+      <!-- No Comments State -->
+      <div *ngIf="comments.length === 0" class="no-comments">
+        <mat-icon>chat_bubble_outline</mat-icon>
+        <p>No comments yet</p>
+        <span>Be the first to share what you think!</span>
+      </div>
+
+      <!-- Comments List -->
+      <div class="comments-list" *ngIf="comments.length > 0">
+        <div *ngFor="let comment of comments" class="comment-item">
+          <!-- Comment Vote Section -->
+          <div class="comment-vote">
+            <button 
+              mat-icon-button 
+              class="vote-btn-small"
+              [class.voted]="comment.user_vote === 1"
+              (click)="voteComment(comment.id, comment.user_vote === 1 ? 0 : 1)">
+              <mat-icon>arrow_upward</mat-icon>
+            </button>
+            
+            <span class="vote-count-small">{{ comment.vote_count }}</span>
+            
+            <button 
+              mat-icon-button 
+              class="vote-btn-small"
+              [class.voted]="comment.user_vote === -1"
+              (click)="voteComment(comment.id, comment.user_vote === -1 ? 0 : -1)">
+              <mat-icon>arrow_downward</mat-icon>
+            </button>
+          </div>
+
+          <!-- Comment Content -->
+          <div class="comment-content">
+            <div class="comment-header">
+              <span class="comment-author">u/{{ comment.anonymous_username }}</span>
+              <span class="comment-time">{{ getTimeAgo(comment.created_at) }}</span>
+            </div>
+
+            <p class="comment-text">{{ comment.content }}</p>
+
+            <div class="comment-actions">
+              <button mat-button (click)="startReply(comment.id)">
+                <mat-icon>reply</mat-icon>
+                Reply
+              </button>
+              <button mat-button color="warn" (click)="deleteComment(comment.id)">
+                <mat-icon>delete</mat-icon>
+                Delete
+              </button>
+            </div>
+
+            <!-- Reply Form -->
+            <div *ngIf="replyingTo === comment.id" class="reply-form">
+              <form [formGroup]="replyForm" (ngSubmit)="submitReply(comment.id)">
+                <mat-form-field appearance="outline" class="full-width">
+                  <textarea 
+                    matInput 
+                    formControlName="content"
+                    rows="3"
+                    placeholder="Write a reply..."
+                  ></textarea>
+                </mat-form-field>
+
+                <div class="reply-actions">
+                  <button mat-button type="button" (click)="cancelReply()">Cancel</button>
+                  <button 
+                    mat-raised-button 
+                    color="primary" 
+                    type="submit"
+                    [disabled]="replyForm.invalid">
+                    Reply
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <!-- Nested Replies -->
+            <div *ngIf="comment.replies && comment.replies.length > 0" class="replies">
+              <div *ngFor="let reply of comment.replies" class="comment-item reply-item">
+                <div class="comment-vote">
+                  <button 
+                    mat-icon-button 
+                    class="vote-btn-small"
+                    [class.voted]="reply.user_vote === 1"
+                    (click)="voteComment(reply.id, reply.user_vote === 1 ? 0 : 1)">
+                    <mat-icon>arrow_upward</mat-icon>
+                  </button>
+                  
+                  <span class="vote-count-small">{{ reply.vote_count }}</span>
+                  
+                  <button 
+                    mat-icon-button 
+                    class="vote-btn-small"
+                    [class.voted]="reply.user_vote === -1"
+                    (click)="voteComment(reply.id, reply.user_vote === -1 ? 0 : -1)">
+                    <mat-icon>arrow_downward</mat-icon>
+                  </button>
+                </div>
+
+                <div class="comment-content">
+                  <div class="comment-header">
+                    <span class="comment-author">u/{{ reply.anonymous_username }}</span>
+                    <span class="comment-time">{{ getTimeAgo(reply.created_at) }}</span>
+                  </div>
+
+                  <p class="comment-text">{{ reply.content }}</p>
+
+                  <div class="comment-actions">
+                    <button mat-button color="warn" (click)="deleteComment(reply.id)">
+                      <mat-icon>delete</mat-icon>
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+</div>
