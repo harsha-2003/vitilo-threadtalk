@@ -22,7 +22,7 @@ import (
 var testUserCounter = 0
 
 func setupDB(t *testing.T) *gorm.DB {
-	db, err := gorm.Open(sqlite.Open("file::memory:?cache=shared"), &gorm.Config{
+	db, err := gorm.Open(sqlite.Open(fmt.Sprintf("file:%s?mode=memory&cache=shared", t.Name())), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Silent), // ✅ DISABLE LOGS
 	})
 	if err != nil {
