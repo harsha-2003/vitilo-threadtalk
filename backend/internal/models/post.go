@@ -15,7 +15,6 @@ type Post struct {
 	Title    string `gorm:"not null" json:"title" binding:"required"`
 	Content  string `gorm:"type:text" json:"content"`
 	ImageURL string `json:"image_url"`
-	LinkURL  string `json:"link_url"`
 	PostType string `gorm:"default:'text'" json:"post_type"` // text, image, link
 
 	UserID      uint `gorm:"not null;index" json:"user_id"`
