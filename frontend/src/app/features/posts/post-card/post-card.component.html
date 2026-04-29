@@ -1,0 +1,119 @@
+<article class="post-card">
+  <!-- Vote Section -->
+  <div class="vote-section">
+    <button 
+      mat-icon-button 
+      class="vote-btn upvote"
+      [class.voted]="post.user_vote === 1"
+      (click)="onUpvote()"
+    >
+      <mat-icon>arrow_upward</mat-icon>
+    </button>
+    
+    <span class="vote-count" [class.upvoted]="post.user_vote === 1" [class.downvoted]="post.user_vote === -1">
+      {{ formatVoteCount(post.vote_count) }}
+    </span>
+    
+    <button 
+      mat-icon-button 
+      class="vote-btn downvote"
+      [class.voted]="post.user_vote === -1"
+      (click)="onDownvote()"
+    >
+      <mat-icon>arrow_downward</mat-icon>
+    </button>
+  </div>
+
+  <!-- Content Section -->
+  <div class="content-section">
+    <!-- Post Header -->
+    <div class="post-header">
+      <a [routerLink]="['/community', post.community_id]" class="community-link">
+        <div class="community-icon">
+          <mat-icon>forum</mat-icon>
+        </div>
+        <span class="community-name">c/{{ post.community_name }}</span>
+      </a>
+      
+      <span class="separator">•</span>
+      
+      <span class="post-meta">
+        Posted by <span class="author">{{ post.anonymous_username }}</span>
+        <span class="time">{{ getTimeAgo(post.created_at) }}</span>
+      </span>
+    </div>
+
+    <!-- Post Title -->
+    <h2 class="post-title" [routerLink]="['/post', post.id]">
+      {{ post.title }}
+    </h2>
+
+    <!-- Post Content -->
+    <div class="post-content" *ngIf="post.post_type === 'text' && post.content">
+      <p class="content-preview" [class.expanded]="isExpanded">
+        {{ post.content }}
+      </p>
+      <button 
+        mat-button 
+        class="expand-btn" 
+        *ngIf="post.content.length > 300"
+        (click)="toggleExpand()"
+      >
+        {{ isExpanded ? 'Show less' : 'Show more' }}
+      </button>
+    </div>
+
+    <!-- Post Image -->
+    <div class="post-image" *ngIf="post.post_type === 'image' && post.image_url">
+      <img [src]="post.image_url" [alt]="post.title" (click)="openImage(post.image_url)" />
+    </div>
+
+    <!-- Post Actions -->
+    <div class="post-actions">
+      <button 
+        mat-button 
+        class="action-btn"
+        [routerLink]="['/post', post.id]"
+      >
+        <mat-icon>comment</mat-icon>
+        <span>{{ post.comment_count }} Comments</span>
+      </button>
+
+      <button mat-button class="action-btn" (click)="sharePost()">
+        <mat-icon>share</mat-icon>
+        <span>Share</span>
+      </button>
+
+      <button mat-button class="action-btn" (click)="savePost()">
+        <mat-icon>bookmark_border</mat-icon>
+        <span>Save</span>
+      </button>
+
+      <button 
+        mat-icon-button 
+        [matMenuTriggerFor]="postMenu"
+        class="action-btn more-btn"
+      >
+        <mat-icon>more_horiz</mat-icon>
+      </button>
+    </div>
+  </div>
+</article>
+
+<!-- Post Menu -->
+<mat-menu #postMenu="matMenu">
+  <button mat-menu-item (click)="reportPost()">
+    <mat-icon>flag</mat-icon>
+    <span>Report</span>
+  </button>
+  
+  <button mat-menu-item *ngIf="isOwnPost()" (click)="editPost()">
+    <mat-icon>edit</mat-icon>
+    <span>Edit</span>
+  </button>
+  
+  <button mat-menu-item *ngIf="isOwnPost()" (click)="deletePost()">
+    <mat-icon color="warn">delete</mat-icon>
+    <span>Delete</span>
+  </button>
+</mat-menu>
